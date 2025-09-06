@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
+                <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="index.html#about">About Us</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="nav-overlay" id="nav-overlay"></div>
+            <div class="cart-icon">
+                <a href="cart.html" class="active"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+            </div>
+        </div>
+    </header>
+
+    <section class="cart-section">
+        <div class="container">
+            <h1>Your Shopping Cart</h1>
+            
+            <div id="cart-empty-message" class="cart-empty">
+                <p>Your cart is empty.</p>
+                <a href="products.html" class="btn">Browse Products</a>
+            </div>
+
+            <div id="cart-items-container" class="cart-items">
+                <!-- Cart items will be loaded dynamically from JavaScript -->
+            </div>
+
+            <div id="cart-summary" class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="cart-subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span id="delivery-fee">₹30.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="cart-total">₹0.00</span>
+                </div>
+                <button id="checkout-btn" class="btn checkout-btn">Proceed to Checkout</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="customer-type-section" class="customer-type-section hidden">
+        <div class="container">
+            <h2>Select Customer Type</h2>
+            <div class="customer-type-options">
+                <div class="customer-option" data-type="college">
+                    <div class="option-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3>College Student</h3>
+                    <p>I'm a college student and need delivery to my hostel</p>
+                </div>
+                <div class="customer-option" data-type="outsider">
+                    <div class="option-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Outsider</h3>
+                    <p>I'm not a college student and need delivery to my address</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hostel-selection-section" class="hostel-selection-section hidden">
+        <div class="container">
+            <h2>Select Your Hostel</h2>
+            <div class="hostel-grid">
+                <div class="hostel-option" data-hostel="boys-hostel-a">
+                    <div class="hostel-image">
+                        <img src="images/vivek.jpeg" alt="Vivekanand Hostel" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJveXMgSG9zdGVsIEE8L3RleHQ+Cjwvc3ZnPg=='">
+                    </div>
+                    <h3>Vivekanand Hostel</h3>
+                    
+                </div>
+                <div class="hostel-option" data-hostel="boys-hostel-b">
+                    <div class="hostel-image">
+                        <img src="images/hostel-boys-b.jpg" alt="Mandela Hostel" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJveXMgSG9zdGVsIEI8L3RleHQ+Cjwvc3ZnPg=='">
+                    </div>
+                    <h3>Mandela Boys Hostel</h3>
+                </div>
+                <div class="hostel-option" data-hostel="boys-hostel-c">
+                    <div class="hostel-image">
+                        <img src="images/hostel-boys-c.jpg" alt="Vardhman Hostel" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJveXMgSG9zdGVsIEM8L3RleHQ+Cjwvc3ZnPg=='">
+                    </div>
+                    <h3>Vardhman Hostel </h3>
+                </div>
+                <div class="hostel-option" data-hostel="boys-hostel-d">
+                    <div class="hostel-image">
+                        <img src="images/hostel-boys-d.jpg" alt="Tagore Hostel" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjVGNUY1Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJveXMgSG9zdGVsIEQ8L3RleHQ+Cjwvc3ZnPg=='">
+                    </div>
+                    <h3>Tagore Hostel</h3>
+                </div>
+            </div>
+            <div class="hostel-actions">
+                <button id="back-to-customer-type" class="btn btn-secondary">Back</button>
+                <button id="proceed-with-hostel" class="btn" disabled>Proceed to Checkout</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="checkout-form-section" class="checkout-section hidden">
+        <div class="container">
+            <h2>Checkout</h2>
+            <form id="checkout-form">
+                <div class="form-section">
+                    <h3>Delivery Information</h3>
+                    <div class="form-group">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Delivery Address</label>
+                        <textarea id="address" name="address" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Payment Method</h3>
+                    <div class="payment-options">
+                        <div class="payment-option">
+                            <input type="radio" id="cod" name="payment" value="cod" checked>
+                            <label for="cod">Cash on Delivery</label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" id="online" name="payment" value="online">
+                            <label for="online">Online Payment (UPI/Card)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <div id="checkout-items">
+                        <!-- Order items will be loaded dynamically -->
+                    </div>
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="checkout-subtotal">₹0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery Fee:</span>
+                        <span id="checkout-delivery-fee">₹30.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="checkout-total">₹0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn place-order-btn">Place Order</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="order-confirmation" class="order-confirmation hidden">
+        <div class="confirmation-content">
+            <i class="fas fa-check-circle"></i>
+            <h2>Order Placed Successfully!</h2>
+            <p>Your order has been received and is being processed.</p>
+            <p>Order ID: <span id="order-id"></span></p>
+            <p>Thank you for shopping with GaramDhoodh!</p>
+            <a href="index.html" class="btn">Back to Home</a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>GaramDhoodh</h3>
+                    <p>Fresh Boiled Milk Delivery</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>Follow Us</h4>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GaramDoodh. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
