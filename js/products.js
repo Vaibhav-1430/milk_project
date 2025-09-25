@@ -46,12 +46,18 @@ window.products = [
 
 // Function to create product card HTML
 function createProductCard(product) {
+    const delay = product.id * 50;
     return `
-        <div class="product-card" data-id="${product.id}">
+        <div class="product-card" data-id="${product.id}" data-aos="fade-up" data-aos-delay="${delay}">
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name} ${product.quantity}" onerror="this.onerror=null; this.src='images/logo.svg';">
             </div>
             <div class="product-info">
+                <div class="badges">
+                    <span class="badge green">Fresh</span>
+                    ${product.id === 4 ? '<span class="badge blue">Best Value</span>' : ''}
+                    ${product.id === 2 ? '<span class="badge">Popular</span>' : ''}
+                </div>
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-quantity">${product.quantity}</p>
                 <p class="product-price">₹${product.price.toFixed(2)}</p>
