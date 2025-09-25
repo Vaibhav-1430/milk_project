@@ -1,0 +1,7 @@
+{
+    "to": "test@example.com",
+    "subject": "Direct Worker Test",
+    "html": "<b>Hello directly from Netlify worker</b>",
+    "text": "Plain text body"
+  }
+  

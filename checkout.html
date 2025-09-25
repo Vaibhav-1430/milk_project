@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Place Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .checkout-container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .checkout-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .checkout-container input,
+    .checkout-container select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .checkout-container button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .checkout-container button:hover {
+      background: #218838;
+    }
+
+    #orderResult {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-container">
+    <h2>Place Your Order</h2>
+    <form id="checkoutForm">
+      <input type="text" name="name" placeholder="Name" required />
+      <input type="text" name="phone" placeholder="Phone" required />
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="text" name="hostel" placeholder="Hostel" required />
+      <input type="text" name="address" placeholder="Address" required />
+
+      <select name="paymentMethod" required>
+        <option value="cod">Cash on Delivery</option>
+        <option value="online">Online Payment</option>
+      </select>
+
+      <button type="submit">Place Order</button>
+    </form>
+    <div id="orderResult"></div>
+  </div>
+
+  <!-- Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+    document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const paymentMethod = e.target.paymentMethod.value;
+
+      // Sample order, replace with cart later
+      const orderData = {
+        items: [
+          { name: "Milk", price: 50, quantity: 2 }
+        ],
+        customerType: "college",
+        hostel: e.target.hostel.value,
+        address: e.target.address.value,
+        contactInfo: {
+          name: e.target.name.value,
+          phone: e.target.phone.value,
+          email: e.target.email.value
+        },
+        payment: { method: paymentMethod }
+      };
+
+      const resultDiv = document.getElementById("orderResult");
+
+      try {
+        if (paymentMethod === "cod") {
+          // Cash on Delivery → directly call backend
+          const res = await fetch("https://garamdoodh.netlify.app/api/orders-guest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData)
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            resultDiv.innerHTML = `✅ Order placed! <br> Order No: <b>${data.data.orderNumber}</b><br>Total: ₹${data.data.pricing.total}`;
+            resultDiv.className = "success";
+          } else {
+            resultDiv.innerText = `❌ Failed: ${data.message}`;
+            resultDiv.className = "error";
+          }
+        } else {
+          // Online Payment → Step 1: Create Razorpay order from backend
+          const backendRes = await fetch("/.netlify/functions/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: orderData.items, currency: "INR" }) // set amount dynamically later
+          });
+          const backendData = await backendRes.json();
+
+          if (!backendData.success) throw new Error("Failed to create Razorpay order");
+
+          // Step 2: Open Razorpay checkout
+          const options = {
+            key: "rzp_live_RLKa3dYIPnE2b8", // Publishable key only
+            amount: backendData.order.amount,
+            currency: backendData.order.currency,
+            name: "Garam Doodh",
+            description: "Milk Order Payment",
+            order_id: backendData.order.id,
+            handler: async function (response) {
+              // Step 3: Verify payment + save order in DB
+              const verifyRes = await fetch("/.netlify/functions/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  orderData
+                })
+              });
+
+              const data = await verifyRes.json();
+              if (data.success) {
+                resultDiv.innerHTML = `✅ Payment Successful!<br>Order No: <b>${data.order.data.orderNumber}</b>`;
+                resultDiv.className = "success";
+              } else {
+                resultDiv.innerText = `❌ Payment verification failed`;
+                resultDiv.className = "error";
+              }
+            },
+            prefill: {
+              name: e.target.name.value,
+              email: e.target.email.value,
+              contact: e.target.phone.value
+            },
+            theme: { color: "#3399cc" }
+          };
+
+          const rzp = new Razorpay(options);
+          rzp.open();
+        }
+      } catch (err) {
+        resultDiv.innerText = "⚠️ Error placing order.";
+        resultDiv.className = "error";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
