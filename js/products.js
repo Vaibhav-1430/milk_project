@@ -5,42 +5,42 @@ window.products = [
         name: 'Fresh Boiled Milk',
         quantity: '100 ml',
         price: 17,
-        image: 'images/milk-100ml.svg'
+        image: 'images/garam-doodh-logo.png'
     },
     {
         id: 2,
         name: 'Fresh Boiled Milk',
         quantity: '250 ml',
         price: 32,
-        image: 'images/milk-250ml.svg'
+        image: 'images/garam-doodh-logo.png'
     },
     {
         id: 3,
         name: 'Fresh Boiled Milk',
         quantity: '500 ml',
         price: 52,
-        image: 'images/milk-500ml.svg'
+        image: 'images/garam-doodh-logo.png'
     },
     {
         id: 4,
         name: 'Fresh Boiled Milk',
         quantity: '1 L',
         price: 92,
-        image: 'images/milk-1l.svg'
+        image: 'images/garam-doodh-logo.png'
     },
     {
         id: 5,
         name: 'Fresh Boiled Milk',
         quantity: '2 L',
         price: 172,
-        image: 'images/milk-2l.svg'
+        image: 'images/garam-doodh-logo.png'
     },
     {
         id: 6,
         name: 'Fresh Boiled Milk',
         quantity: '5 L',
         price: 402,
-        image: 'images/milk-5l.svg'
+        image: 'images/garam-doodh-logo.png'
     }
 ];
 
