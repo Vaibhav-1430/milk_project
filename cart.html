@@ -41,9 +41,10 @@
     #orderResult.success { color: green; }
     #orderResult.error { color: red; }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
 <body>
-  <header>
+  <header data-aos="fade-down" data-aos-duration="700">
     <div class="container">
       <div class="logo">
         <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
@@ -65,7 +66,7 @@
   </header>
 
   <!-- CART SECTION -->
-  <section class="cart-section">
+  <section class="cart-section" data-aos="fade-up">
     <div class="container">
       <h1>Your Shopping Cart</h1>
       <div id="cart-empty-message" class="cart-empty">
@@ -74,6 +75,14 @@
       </div>
       <div id="cart-items-container" class="cart-items"></div>
       <div id="cart-summary" class="cart-summary">
+        <div class="addon-upsell">
+          <label class="addon-control">
+            <input type="checkbox" id="glass-bottle-addon" />
+            <span class="checkmark"></span>
+            <span class="addon-text">Add Reusable Glass Bottle <strong>(+₹7)</strong></span>
+          </label>
+          <p class="addon-note">Keeps milk fresher, eco-friendly, one-time add-on per order</p>
+        </div>
         <div class="summary-row"><span>Subtotal:</span><span id="cart-subtotal">₹0.00</span></div>
         <div class="summary-row"><span>Delivery Fee:</span><span id="delivery-fee">₹30.00</span></div>
         <div class="summary-row total"><span>Total:</span><span id="cart-total">₹0.00</span></div>
@@ -83,19 +92,45 @@
   </section>
 
   <!-- CHECKOUT SECTION -->
-  <section id="checkout-form-section" class="checkout-section hidden">
+  <section id="checkout-form-section" class="checkout-section hidden" data-aos="fade-up">
     <div class="container">
       <h2>Checkout</h2>
-      <form id="checkoutForm">
+      <div class="checkout-steps" aria-label="Checkout progress" data-aos="fade-up" data-aos-delay="50">
+        <div class="step active"><span class="step-index">1</span><span class="step-label">Cart</span></div>
+        <div class="step"><span class="step-index">2</span><span class="step-label">Details</span></div>
+        <div class="step"><span class="step-index">3</span><span class="step-label">Payment</span></div>
+      </div>
+      <form id="checkoutForm" data-aos="fade-up" data-aos-delay="100">
         <input type="text" name="name" placeholder="Full Name" required />
         <input type="text" name="phone" placeholder="Phone" required />
         <input type="email" name="email" placeholder="Email" required />
         <input type="text" name="hostel" placeholder="Hostel (if any)" />
         <textarea name="address" placeholder="Delivery Address" rows="3" required></textarea>
-        <select name="paymentMethod" required>
-          <option value="cod">Cash on Delivery</option>
-          <option value="online">Online Payment</option>
-        </select>
+        <div class="form-section">
+          <h3>Payment Method</h3>
+          <div class="payment-cards" id="payment-cards">
+            <label class="payment-card" data-method="cod">
+              <input type="radio" name="paymentMethod" value="cod" checked>
+              <div class="payment-card-content">
+                <i class="fas fa-money-bill-wave"></i>
+                <div>
+                  <strong>Cash on Delivery</strong>
+                  <p>Pay when the milk arrives</p>
+                </div>
+              </div>
+            </label>
+            <label class="payment-card" data-method="online">
+              <input type="radio" name="paymentMethod" value="online">
+              <div class="payment-card-content">
+                <i class="fas fa-credit-card"></i>
+                <div>
+                  <strong>Online Payment</strong>
+                  <p>Secure UPI / Card via Razorpay</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
         <div class="order-summary">
           <h3>Order Summary</h3>
           <div id="checkout-items"></div>
@@ -119,7 +154,7 @@
     </div>
   </div>
 
-  <footer>
+  <footer data-aos="fade-up">
     <div class="container">
       <div class="footer-bottom">
         <p>&copy; 2025 GaramDoodh. All Rights Reserved.</p>
@@ -132,6 +167,8 @@
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',function(){ if(window.AOS){ AOS.init({ once:true, offset:80, duration:600, easing:'ease-out'});} });</script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 </body>

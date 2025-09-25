@@ -1,5 +1,6 @@
 // Cart functionality
 let cart = [];
+let glassBottleAddon = false; // ₹7 add-on state
 
 // Define products array if it's not already defined
 let products;
@@ -19,15 +20,18 @@ if (typeof window.products === 'undefined') {
 // Load cart from localStorage
 function loadCart() {
     const savedCart = localStorage.getItem('garamdoodhCart');
+    const savedAddon = localStorage.getItem('garamdoodhGlassBottleAddon');
     if (savedCart) {
         cart = JSON.parse(savedCart);
         updateCartCount();
     }
+    glassBottleAddon = savedAddon === 'true';
 }
 
 // Save cart to localStorage
 function saveCart() {
     localStorage.setItem('garamdoodhCart', JSON.stringify(cart));
+    localStorage.setItem('garamdoodhGlassBottleAddon', String(glassBottleAddon));
     updateCartCount();
 }
 
@@ -89,9 +93,10 @@ function updateCartItemQuantity(productId, quantity) {
 function calculateCartTotals() {
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const deliveryFee = 0;
-    const total = subtotal + deliveryFee;
+    const addonFee = glassBottleAddon ? 7 : 0;
+    const total = subtotal + deliveryFee + addonFee;
 
-    return { subtotal, deliveryFee, total };
+    return { subtotal, deliveryFee, addonFee, total };
 }
 
 // Display cart items
@@ -137,16 +142,38 @@ function displayCart() {
     });
 
     addCartEventListeners();
+
+    // sync addon checkbox if present
+    const addonCheckbox = document.getElementById('glass-bottle-addon');
+    if (addonCheckbox) {
+        addonCheckbox.checked = glassBottleAddon;
+        addonCheckbox.addEventListener('change', function() {
+            glassBottleAddon = this.checked;
+            localStorage.setItem('garamdoodhGlassBottleAddon', String(glassBottleAddon));
+            updateCartTotals();
+        });
+    }
+
     updateCartTotals();
 }
 
 // Update totals in UI
 function updateCartTotals() {
-    const { subtotal, deliveryFee, total } = calculateCartTotals();
+    const { subtotal, deliveryFee, addonFee, total } = calculateCartTotals();
 
-    document.getElementById('cart-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-    document.getElementById('delivery-fee').textContent = `₹${deliveryFee.toFixed(2)}`;
-    document.getElementById('cart-total').textContent = `₹${total.toFixed(2)}`;
+    const subEl = document.getElementById('cart-subtotal');
+    const delEl = document.getElementById('delivery-fee');
+    const totEl = document.getElementById('cart-total');
+
+    if (subEl) subEl.textContent = `₹${subtotal.toFixed(2)}`;
+    if (delEl) delEl.textContent = `₹${deliveryFee.toFixed(2)}`;
+    if (totEl) totEl.textContent = `₹${total.toFixed(2)}`;
+
+    // Reflect addon on checkout panel if available
+    const checkoutAddonRow = document.getElementById('checkout-addon-fee');
+    if (checkoutAddonRow) {
+        checkoutAddonRow.textContent = `₹${addonFee.toFixed(2)}`;
+    }
 }
 
 // Add event listeners
@@ -205,6 +232,22 @@ function setupCheckout() {
             checkoutFormSection.classList.remove('hidden');
             cartSection.classList.add('hidden');
             displayCheckoutItems();
+
+            // init payment card selection visuals
+            const paymentCards = document.querySelectorAll('.payment-card');
+            const radios = document.querySelectorAll('input[name="paymentMethod"]');
+            function updateSelected() {
+                paymentCards.forEach(card => {
+                    const input = card.querySelector('input[type="radio"]');
+                    if (input && input.checked) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                });
+            }
+            radios.forEach(r => r.addEventListener('change', updateSelected));
+            updateSelected();
         }
     });
 
@@ -229,11 +272,14 @@ function setupCheckout() {
             const paymentMethod = checkoutForm.paymentMethod.value;
             const hostel = checkoutForm.hostel.value;
 
-            const itemsPayload = cart.map(item => ({
+            let itemsPayload = cart.map(item => ({
                 name: `${item.name} (${item.productQuantity})`,
                 quantity: item.quantity,
                 price: item.price
             }));
+            if (glassBottleAddon) {
+                itemsPayload.push({ name: 'Reusable Glass Bottle', quantity: 1, price: 7 });
+            }
 
             // Default to 'college' if hostel is provided, otherwise 'outsider'
             const customerType = hostel ? 'college' : 'outsider';
@@ -349,10 +395,35 @@ function displayCheckoutItems() {
         `;
     });
 
+    if (glassBottleAddon) {
+        checkoutItems.innerHTML += `
+            <div class="checkout-item">
+                <div class="checkout-item-name">Reusable Glass Bottle <span class="checkout-item-quantity">x1</span></div>
+                <div class="checkout-item-price">₹7.00</div>
+            </div>`;
+    }
+
+    // Add-on row inside order summary if addon selected
+    const addonFee = glassBottleAddon ? 7 : 0;
+    if (addonFee > 0) {
+        const addonRow = document.createElement('div');
+        addonRow.className = 'summary-row';
+        addonRow.innerHTML = `<span>Glass Bottle</span><span id="checkout-addon-fee">₹${addonFee.toFixed(2)}</span>`;
+        const orderSummary = document.querySelector('.order-summary');
+        const summaryRows = orderSummary ? orderSummary.querySelectorAll('.summary-row') : [];
+        if (orderSummary && summaryRows.length) {
+            orderSummary.insertBefore(addonRow, summaryRows[summaryRows.length - 1]);
+        }
+    }
+
     const { subtotal, deliveryFee, total } = calculateCartTotals();
-    document.getElementById('checkout-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-    document.getElementById('checkout-delivery-fee').textContent = `₹${deliveryFee.toFixed(2)}`;
-    document.getElementById('checkout-total').textContent = `₹${total.toFixed(2)}`;
+    const subtotalEl = document.getElementById('checkout-subtotal');
+    const deliveryEl = document.getElementById('checkout-delivery-fee');
+    const totalEl = document.getElementById('checkout-total');
+
+    if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+    if (deliveryEl) deliveryEl.textContent = `₹${deliveryFee.toFixed(2)}`;
+    if (totalEl) totalEl.textContent = `₹${total.toFixed(2)}`;
 }
 
 // Simplified checkout - customer type and hostel selection removed

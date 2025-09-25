@@ -6,9 +6,10 @@
     <title>Products - GaramDoodh</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
 <body>
-    <header>
+    <header data-aos="fade-down" data-aos-duration="700">
         <div class="container">
             <div class="logo">
                 <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
@@ -32,14 +33,14 @@
         </div>
     </header>
 
-    <section class="products-hero">
+    <section class="products-hero" data-aos="fade-up">
         <div class="container">
             <h1>Our Milk Products</h1>
             <p>Choose from our range of fresh boiled milk in various quantities</p>
         </div>
     </section>
 
-    <section class="products-section">
+    <section class="products-section" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="filters">
                 <div class="filter-group">
@@ -60,7 +61,7 @@
         </div>
     </section>
 
-    <footer>
+    <footer data-aos="fade-up">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
@@ -95,5 +96,11 @@
     <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        if (window.AOS) { AOS.init({ once: true, offset: 80, duration: 600, easing: 'ease-out' }); }
+      });
+    </script>
 </body>
 </html>

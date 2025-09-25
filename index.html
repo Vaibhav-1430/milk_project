@@ -6,9 +6,10 @@
     <title>GaramDoodh - Fresh Boiled Milk Delivery</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
 <body>
-    <header>
+    <header data-aos="fade-down" data-aos-duration="700">
         <div class="container">
             <div class="logo">
                 <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
@@ -34,7 +35,7 @@
 
     <section class="hero">
         <div class="container">
-            <div class="hero-content">
+            <div class="hero-content" data-aos="fade-up" data-aos-duration="800">
                 <h2>Pure & Fresh Boiled Milk</h2>
                 <div class="tagline">
                     <p>Pure. Safe. Ready. Freshly boiled milk at your doorstep – hygiene and health without the hassle.</p>
@@ -46,25 +47,25 @@
         </div>
     </section>
 
-    <section class="benefits">
+    <section class="benefits" data-aos="fade-up" data-aos-duration="800">
         <div class="container">
             <h2>Why Choose GaramDoodh?</h2>
             <div class="benefits-grid">
-                <div class="benefit-card">
+                <div class="benefit-card" data-aos="zoom-in" data-aos-delay="50">
                     <div class="benefit-icon">
                         <i class="fas fa-clock"></i>
                     </div>
                     <h3>Time-Saving Convenience</h3>
                     <p>Freshly boiled, ready-to-drink milk delivered to your doorstep. Saves you the hassle of boiling, cooling, and storing.</p>
                 </div>
-                <div class="benefit-card">
+                <div class="benefit-card" data-aos="zoom-in" data-aos-delay="150">
                     <div class="benefit-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <h3>Hygiene & Safety</h3>
                     <p>Boiled under strict hygienic standards to eliminate all bacteria while retaining nutrients for your family's health.</p>
                 </div>
-                <div class="benefit-card">
+                <div class="benefit-card" data-aos="zoom-in" data-aos-delay="250">
                     <div class="benefit-icon">
                         <i class="fas fa-leaf"></i>
                     </div>
@@ -75,19 +76,19 @@
         </div>
     </section>
 
-    <section class="featured-products">
+    <section class="featured-products" data-aos="fade-up" data-aos-duration="800">
         <div class="container">
             <h2>Our Products</h2>
             <div class="product-grid">
                 <!-- Product cards will be dynamically loaded from JavaScript -->
             </div>
-            <div class="view-all">
+            <div class="view-all" data-aos="fade-up" data-aos-delay="100">
                 <a href="products.html" class="btn">View All Products</a>
             </div>
         </div>
     </section>
 
-    <section id="about" class="about">
+    <section id="about" class="about" data-aos="fade-up" data-aos-duration="800">
         <div class="container">
             <h2>About GaramDoodh</h2>
             <div class="about-content">
@@ -95,14 +96,14 @@
                     <p>GaramDoodh is committed to providing the freshest and purest boiled milk to our customers. We source our milk from local farms and ensure it's properly boiled and packaged for your convenience.</p>
                     <p>Our mission is to make fresh boiled milk accessible to everyone, offering various quantities to suit your needs.</p>
                 </div>
-                <div class="about-image">
+                <div class="about-image" data-aos="zoom-in">
                     <img src="images/about-milk.svg" alt="Fresh Milk">
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="contact" class="contact">
+    <section id="contact" class="contact" data-aos="fade-up" data-aos-duration="800">
         <div class="container">
             <h2>Contact Us</h2>
             <div class="contact-content">
@@ -137,7 +138,7 @@
         </div>
     </section>
 
-    <footer>
+    <footer data-aos="fade-up" data-aos-duration="800">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
@@ -172,5 +173,11 @@
     <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        if (window.AOS) { AOS.init({ once: true, offset: 80, duration: 600, easing: 'ease-out' }); }
+      });
+    </script>
 </body>
 </html>

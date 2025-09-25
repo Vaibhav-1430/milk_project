@@ -357,6 +357,13 @@ nav ul li a:hover::after {
     transform: translateY(-5px);
 }
 
+/* Subtle elevated card look and tighter layout */
+.product-card { border: 1px solid #f1f1f1; }
+.product-card .product-info { display: flex; flex-direction: column; gap: 10px; }
+.product-actions .btn.add-to-cart { border-radius: 6px; }
+.quantity-btn { border-radius: 6px; }
+.quantity-input { border-radius: 6px; }
+
 .product-image {
     height: 200px;
     background-color: #f5f5f5;
@@ -391,6 +398,11 @@ nav ul li a:hover::after {
     font-size: 1.3rem;
     margin-bottom: 15px;
 }
+/* Badges on product cards */
+.badges { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.badge { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; padding: 4px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.badge.green { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+.badge.blue { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
 
 .product-actions {
     display: flex;
@@ -686,6 +698,26 @@ footer {
     margin-left: auto;
 }
 
+/* Add-on (Glass Bottle) Upsell */
+.addon-upsell {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 14px 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.addon-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+.addon-control input { width: 18px; height: 18px; }
+.addon-text { color: #222; }
+.addon-note { margin-top: 6px; color: #6b7280; font-size: 0.9rem; }
+
 .summary-row {
     display: flex;
     justify-content: space-between;
@@ -890,6 +922,20 @@ footer {
     margin-bottom: 30px;
     color: var(--dark-color);
 }
+
+/* Form field polish for checkout */
+.checkout-section form input,
+.checkout-section form textarea,
+.checkout-section form select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.checkout-section form button[type="submit"],
+.checkout-btn { border-radius: 8px; }
 
 .form-section {
     background-color: white;
@@ -1200,6 +1246,8 @@ footer {
     .cart-summary {
         margin: 0 auto;
     }
+
+    .addon-upsell { padding: 12px; }
 }
 
 @media (max-width: 576px) {
@@ -1407,4 +1455,43 @@ footer {
         -ms-user-select: none;
         user-select: none;
     }
+
+    .payment-cards { grid-template-columns: 1fr; }
 }
+
+/* --- Cart/Checkout polish --- */
+.cart-items { margin-bottom: 30px; }
+.cart-item { border-bottom: 1px solid #eef2f7; }
+.cart-item .remove-item { color: #ef4444; transition: transform .1s ease, color .2s ease; }
+.cart-item .remove-item:hover { color: #dc2626; transform: scale(1.05); }
+.quantity-btn { background: #f3f4f6; border: 1px solid #e5e7eb; width: 34px; height: 34px; }
+.quantity-input { height: 34px; width: 48px; border-radius: 6px; }
+
+/* Sticky summary on desktop */
+@media (min-width: 992px) {
+    .cart-summary { position: sticky; top: 100px; }
+}
+
+/* Gradient checkout button */
+.checkout-btn, .place-order-btn, #checkoutForm button[type="submit"] {
+    background: linear-gradient(135deg, #ff6b35, #ff8f6a);
+    border: none;
+    color: #fff;
+    transition: transform .1s ease, box-shadow .2s ease;
+}
+.checkout-btn:hover, .place-order-btn:hover, #checkoutForm button[type="submit"]:hover {
+    box-shadow: 0 10px 24px rgba(255,107,53,.3);
+}
+.checkout-btn:active, .place-order-btn:active, #checkoutForm button[type="submit"]:active { transform: translateY(1px); }
+
+/* Payment cards refinement */
+.payment-card { cursor: pointer; }
+.payment-card .payment-card-content { border: 2px solid transparent; border-radius: 10px; }
+.payment-card.selected .payment-card-content { border-color: var(--primary-color); background: #fff7f3; }
+
+/* Steps */
+.checkout-steps { display:flex; gap:14px; align-items:center; margin: 10px 0 20px; }
+.checkout-steps .step { display:flex; align-items:center; gap:8px; color:#6b7280; }
+.checkout-steps .step .step-index { width:26px; height:26px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#e5e7eb; color:#374151; font-weight:700; font-size:.85rem; }
+.checkout-steps .step.active { color:#111827; }
+.checkout-steps .step.active .step-index { background: var(--primary-color); color:#fff; }
