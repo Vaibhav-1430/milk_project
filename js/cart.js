@@ -297,6 +297,7 @@ function setupCheckout() {
                     });
 
                     if (response.success) {
+                        triggerOrderPlacedAnimation();
                         document.getElementById('order-id').textContent = response.data.orderNumber;
                         document.getElementById('order-confirmation').classList.remove('hidden');
                         cart = [];
@@ -342,6 +343,7 @@ function setupCheckout() {
                                 });
 
                                 if (orderResponse.success) {
+                                    triggerOrderPlacedAnimation();
                                     document.getElementById('order-id').textContent = orderResponse.data.orderNumber;
                                     document.getElementById('order-confirmation').classList.remove('hidden');
                                     cart = [];
@@ -434,3 +436,20 @@ document.addEventListener('DOMContentLoaded', function () {
     displayCart();
     setupCheckout();
 });
+
+// Show the order placed animation overlay for ~10 seconds, then hide
+function triggerOrderPlacedAnimation() {
+    const overlay = document.getElementById('order-animation');
+    if (!overlay) return;
+    const button = overlay.querySelector('.order');
+    overlay.classList.remove('hidden');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (button && !button.classList.contains('animate')) {
+        button.classList.add('animate');
+        setTimeout(() => {
+            button.classList.remove('animate');
+            overlay.classList.add('hidden');
+            overlay.setAttribute('aria-hidden', 'true');
+        }, 10000);
+    }
+}
