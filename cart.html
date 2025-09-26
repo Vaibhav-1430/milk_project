@@ -40,6 +40,126 @@
     }
     #orderResult.success { color: green; }
     #orderResult.error { color: red; }
+    
+    /* Coupon Section Styling */
+    .coupon-section {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .coupon-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .coupon-input-group input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .btn-coupon {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .btn-coupon:hover {
+      background: #0056b3;
+    }
+    
+    .btn-coupon:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .coupon-message {
+      font-size: 14px;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+    
+    .coupon-message.success {
+      color: #28a745;
+    }
+    
+    .coupon-message.error {
+      color: #dc3545;
+    }
+    
+    .coupon-discount {
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    /* Available Coupons Styling */
+    .available-coupons {
+      margin-top: 15px;
+    }
+    
+    .available-coupons details {
+      cursor: pointer;
+    }
+    
+    .available-coupons summary {
+      font-size: 14px;
+      color: #666;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .coupon-list {
+      margin-top: 10px;
+    }
+    
+    .coupon-item {
+      padding: 6px 0;
+      font-size: 13px;
+      color: #555;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .coupon-item:last-child {
+      border-bottom: none;
+    }
+    
+    .coupon-item strong {
+      color: #007bff;
+      font-family: monospace;
+    }
+    
+    /* Mobile responsiveness for coupon section */
+    @media (max-width: 768px) {
+      .coupon-input-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .coupon-input-group input {
+        width: 100%;
+      }
+      
+      .btn-coupon {
+        width: 100%;
+      }
+      
+      .remove-coupon {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-top: 8px;
+      }
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
@@ -85,6 +205,40 @@
         </div>
         <div class="summary-row"><span>Subtotal:</span><span id="cart-subtotal">₹0.00</span></div>
         <div class="summary-row"><span>Delivery Fee:</span><span id="delivery-fee">₹30.00</span></div>
+        
+        <!-- Coupon Section -->
+        <div class="coupon-section">
+          <div class="coupon-input-group">
+            <input type="text" id="coupon-code" placeholder="Enter coupon code" />
+            <button type="button" id="apply-coupon-btn" class="btn-coupon">Apply</button>
+          </div>
+          <div id="coupon-message" class="coupon-message"></div>
+          <div id="coupon-discount-row" class="summary-row coupon-discount hidden">
+            <span>Discount:</span><span id="coupon-discount-amount">₹0.00</span>
+          </div>
+          
+          <!-- Available Coupons Info -->
+          <div class="available-coupons">
+            <details>
+              <summary>Available Coupons</summary>
+              <div class="coupon-list">
+                <div class="coupon-item">
+                  <strong>WELCOME10</strong> - 10% off on your first order
+                </div>
+                <div class="coupon-item">
+                  <strong>SAVE20</strong> - ₹20 off on orders above ₹100
+                </div>
+                <div class="coupon-item">
+                  <strong>MILK15</strong> - 15% off on milk orders
+                </div>
+                <div class="coupon-item">
+                  <strong>FIRST50</strong> - ₹50 off on orders above ₹200
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+        
         <div class="summary-row total"><span>Total:</span><span id="cart-total">₹0.00</span></div>
         <button id="checkout-btn" class="btn checkout-btn">Proceed to Checkout</button>
       </div>
