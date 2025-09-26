@@ -4,6 +4,83 @@ const { sendNewOrderEmail } = require('../../utils/mailer');
 const uri = process.env.MONGODB_URI;
 let client = null;
 
+// Server-side coupon validation
+async function validateCouponOnServer(couponCode, orderAmount) {
+  const coupons = {
+    'WELCOME10': {
+      code: 'WELCOME10',
+      type: 'percentage',
+      value: 10,
+      description: '10% off on your first order',
+      minOrderAmount: 0,
+      maxDiscount: 50,
+      isActive: true
+    },
+    'SAVE20': {
+      code: 'SAVE20',
+      type: 'fixed',
+      value: 20,
+      description: '₹20 off on orders above ₹100',
+      minOrderAmount: 100,
+      maxDiscount: 20,
+      isActive: true
+    },
+    'MILK15': {
+      code: 'MILK15',
+      type: 'percentage',
+      value: 15,
+      description: '15% off on milk orders',
+      minOrderAmount: 0,
+      maxDiscount: 100,
+      isActive: true
+    },
+    'FIRST50': {
+      code: 'FIRST50',
+      type: 'fixed',
+      value: 50,
+      description: '₹50 off on orders above ₹200',
+      minOrderAmount: 200,
+      maxDiscount: 50,
+      isActive: true
+    },
+    'LILY': {
+      code: 'LILY',
+      type: 'percentage',
+      value: 100,
+      description: 'Special 100% off',
+      minOrderAmount: 0,
+      maxDiscount: 1000000,
+      isActive: true
+    }
+  };
+
+  const coupon = coupons[couponCode.toUpperCase()];
+  
+  if (!coupon || !coupon.isActive) {
+    return { valid: false, discountAmount: 0 };
+  }
+
+  if (orderAmount < coupon.minOrderAmount) {
+    return { valid: false, discountAmount: 0 };
+  }
+
+  let discountAmount = 0;
+  if (coupon.type === 'percentage') {
+    discountAmount = orderAmount * (coupon.value / 100);
+    discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+  } else if (coupon.type === 'fixed') {
+    discountAmount = Math.min(coupon.value, coupon.maxDiscount);
+  }
+
+  discountAmount = Math.min(discountAmount, orderAmount);
+
+  return { 
+    valid: true, 
+    discountAmount, 
+    description: coupon.description 
+  };
+}
+
 async function connectDB() {
   if (!client) {
     client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -31,7 +108,7 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { items, customerType, hostel, address, contactInfo, payment, notes } = body;
+    const { items, customerType, hostel, address, contactInfo, payment, notes, coupon } = body;
 
     if (!Array.isArray(items) || items.length === 0)
       return response(400, { success: false, message: 'At least one item is required' });
@@ -46,7 +123,25 @@ exports.handler = async (event) => {
 
     const subtotal = items.reduce((sum, i) => sum + Number(i.price) * Number(i.quantity), 0);
     const deliveryFee = subtotal >= 100 ? 0 : 30;
-    const total = subtotal + deliveryFee;
+    
+    // Calculate coupon discount
+    let couponDiscount = 0;
+    let couponData = null;
+    if (coupon && coupon.code) {
+      // Validate coupon again on server side
+      const couponValidation = await validateCouponOnServer(coupon.code, subtotal);
+      if (couponValidation.valid) {
+        couponDiscount = couponValidation.discountAmount;
+        couponData = {
+          code: coupon.code,
+          type: coupon.type,
+          discount: couponDiscount,
+          description: couponValidation.description
+        };
+      }
+    }
+    
+    const total = subtotal + deliveryFee - couponDiscount;
 
     const now = Date.now();
     const order = {
@@ -62,8 +157,9 @@ exports.handler = async (event) => {
       hostel: customerType === 'college' ? hostel : undefined,
       deliveryAddress: { street: address, city: '', state: '', pincode: '' },
       contactInfo,
-      pricing: { subtotal, deliveryFee, total },
+      pricing: { subtotal, deliveryFee, couponDiscount, total },
       payment: { method: payment.method, status: 'pending' },
+      coupon: couponData,
       deliveryDate: new Date(),
       deliveryTime: 'morning',
       notes

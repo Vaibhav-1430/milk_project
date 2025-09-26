@@ -1,6 +1,7 @@
 // Cart functionality
 let cart = [];
 let glassBottleAddon = false; // ₹7 add-on state
+let appliedCoupon = null; // Store applied coupon data
 
 // Define products array if it's not already defined
 let products;
@@ -21,17 +22,20 @@ if (typeof window.products === 'undefined') {
 function loadCart() {
     const savedCart = localStorage.getItem('garamdoodhCart');
     const savedAddon = localStorage.getItem('garamdoodhGlassBottleAddon');
+    const savedCoupon = localStorage.getItem('garamdoodhAppliedCoupon');
     if (savedCart) {
         cart = JSON.parse(savedCart);
         updateCartCount();
     }
     glassBottleAddon = savedAddon === 'true';
+    appliedCoupon = savedCoupon ? JSON.parse(savedCoupon) : null;
 }
 
 // Save cart to localStorage
 function saveCart() {
     localStorage.setItem('garamdoodhCart', JSON.stringify(cart));
     localStorage.setItem('garamdoodhGlassBottleAddon', String(glassBottleAddon));
+    localStorage.setItem('garamdoodhAppliedCoupon', appliedCoupon ? JSON.stringify(appliedCoupon) : '');
     updateCartCount();
 }
 
@@ -94,9 +98,22 @@ function calculateCartTotals() {
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const deliveryFee = 0;
     const addonFee = glassBottleAddon ? 7 : 0;
-    const total = subtotal + deliveryFee + addonFee;
+    
+    // Calculate coupon discount
+    let couponDiscount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.type === 'percentage') {
+            couponDiscount = (subtotal + addonFee) * (appliedCoupon.value / 100);
+        } else if (appliedCoupon.type === 'fixed') {
+            couponDiscount = appliedCoupon.value;
+        }
+        // Ensure discount doesn't exceed total
+        couponDiscount = Math.min(couponDiscount, subtotal + addonFee);
+    }
+    
+    const total = subtotal + deliveryFee + addonFee - couponDiscount;
 
-    return { subtotal, deliveryFee, addonFee, total };
+    return { subtotal, deliveryFee, addonFee, couponDiscount, total };
 }
 
 // Display cart items
@@ -159,15 +176,27 @@ function displayCart() {
 
 // Update totals in UI
 function updateCartTotals() {
-    const { subtotal, deliveryFee, addonFee, total } = calculateCartTotals();
+    const { subtotal, deliveryFee, addonFee, couponDiscount, total } = calculateCartTotals();
 
     const subEl = document.getElementById('cart-subtotal');
     const delEl = document.getElementById('delivery-fee');
     const totEl = document.getElementById('cart-total');
+    const couponDiscountEl = document.getElementById('coupon-discount-amount');
+    const couponDiscountRow = document.getElementById('coupon-discount-row');
 
     if (subEl) subEl.textContent = `₹${subtotal.toFixed(2)}`;
     if (delEl) delEl.textContent = `₹${deliveryFee.toFixed(2)}`;
     if (totEl) totEl.textContent = `₹${total.toFixed(2)}`;
+    
+    // Show/hide coupon discount row
+    if (couponDiscountRow) {
+        if (couponDiscount > 0) {
+            couponDiscountRow.classList.remove('hidden');
+            if (couponDiscountEl) couponDiscountEl.textContent = `-₹${couponDiscount.toFixed(2)}`;
+        } else {
+            couponDiscountRow.classList.add('hidden');
+        }
+    }
 
     // Reflect addon on checkout panel if available
     const checkoutAddonRow = document.getElementById('checkout-addon-fee');
@@ -217,6 +246,202 @@ function addCartEventListeners() {
             removeFromCart(productId);
         });
     });
+}
+
+// ---------- Coupon Functions ----------
+async function validateCoupon(couponCode) {
+    try {
+        const { subtotal, addonFee } = calculateCartTotals();
+        const orderAmount = subtotal + addonFee;
+        
+        const response = await fetch('/.netlify/functions/validate-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                couponCode: couponCode,
+                orderAmount: orderAmount
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.valid) {
+            return { 
+                valid: true, 
+                coupon: { 
+                    ...result.coupon, 
+                    code: couponCode.toUpperCase() 
+                } 
+            };
+        } else {
+            return { valid: false, message: result.message || 'Invalid coupon code' };
+        }
+    } catch (error) {
+        console.error('Coupon validation error:', error);
+        // Fallback to client-side validation if API fails
+        return validateCouponFallback(couponCode);
+    }
+}
+
+// Fallback client-side validation
+function validateCouponFallback(couponCode) {
+    const validCoupons = {
+        'WELCOME10': { type: 'percentage', value: 10, description: '10% off on your first order' },
+        'SAVE20': { type: 'fixed', value: 20, description: '₹20 off on orders above ₹100' },
+        'MILK15': { type: 'percentage', value: 15, description: '15% off on milk orders' },
+        'FIRST50': { type: 'fixed', value: 50, description: '₹50 off on orders above ₹200' },
+        // Hidden special coupon - not shown in suggestions
+        'LILY': { type: 'percentage', value: 100, description: 'Special 100% off' }
+    };
+    
+    const coupon = validCoupons[couponCode.toUpperCase()];
+    if (!coupon) {
+        return { valid: false, message: 'Invalid coupon code' };
+    }
+    
+    // Check minimum order amount for fixed discounts
+    const { subtotal, addonFee } = calculateCartTotals();
+    const orderTotal = subtotal + addonFee;
+    
+    if (coupon.type === 'fixed' && couponCode.toUpperCase() === 'SAVE20' && orderTotal < 100) {
+        return { valid: false, message: 'Minimum order amount of ₹100 required for this coupon' };
+    }
+    
+    if (coupon.type === 'fixed' && couponCode.toUpperCase() === 'FIRST50' && orderTotal < 200) {
+        return { valid: false, message: 'Minimum order amount of ₹200 required for this coupon' };
+    }
+    
+    return { valid: true, coupon: { ...coupon, code: couponCode.toUpperCase() } };
+}
+
+function applyCoupon() {
+    const couponInput = document.getElementById('coupon-code');
+    const applyBtn = document.getElementById('apply-coupon-btn');
+    const messageEl = document.getElementById('coupon-message');
+    
+    if (!couponInput || !applyBtn || !messageEl) return;
+    
+    const couponCode = couponInput.value.trim();
+    if (!couponCode) {
+        showCouponMessage('Please enter a coupon code', 'error');
+        return;
+    }
+    
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Applying...';
+    
+    // Simulate API call delay
+    setTimeout(async () => {
+        try {
+            const result = await validateCoupon(couponCode);
+            
+            if (result.valid) {
+                appliedCoupon = result.coupon;
+                saveCart();
+                updateCartTotals();
+                showCouponMessage(`✅ ${result.coupon.description} applied successfully!`, 'success');
+                couponInput.value = '';
+                couponInput.disabled = true;
+                applyBtn.textContent = 'Applied';
+                applyBtn.disabled = true;
+                
+                // Add remove coupon button
+                addRemoveCouponButton();
+            } else {
+                showCouponMessage(`❌ ${result.message}`, 'error');
+            }
+        } catch (error) {
+            showCouponMessage('❌ Error validating coupon. Please try again.', 'error');
+        } finally {
+            applyBtn.disabled = false;
+            applyBtn.textContent = 'Apply';
+        }
+    }, 1000);
+}
+
+function removeCoupon() {
+    appliedCoupon = null;
+    saveCart();
+    updateCartTotals();
+    
+    const couponInput = document.getElementById('coupon-code');
+    const applyBtn = document.getElementById('apply-coupon-btn');
+    const messageEl = document.getElementById('coupon-message');
+    
+    if (couponInput) couponInput.disabled = false;
+    if (applyBtn) {
+        applyBtn.textContent = 'Apply';
+        applyBtn.disabled = false;
+    }
+    
+    showCouponMessage('Coupon removed', 'success');
+    
+    // Remove remove button
+    const removeBtn = document.getElementById('remove-coupon-btn');
+    if (removeBtn) removeBtn.remove();
+}
+
+function showCouponMessage(message, type) {
+    const messageEl = document.getElementById('coupon-message');
+    if (messageEl) {
+        messageEl.textContent = message;
+        messageEl.className = `coupon-message ${type}`;
+    }
+}
+
+function addRemoveCouponButton() {
+    const couponSection = document.querySelector('.coupon-section');
+    const existingRemoveBtn = document.getElementById('remove-coupon-btn');
+    
+    if (!couponSection || existingRemoveBtn) return;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.id = 'remove-coupon-btn';
+    removeBtn.className = 'btn-coupon remove-coupon';
+    removeBtn.textContent = 'Remove';
+    removeBtn.style.marginLeft = '10px';
+    removeBtn.style.background = '#dc3545';
+    
+    removeBtn.addEventListener('click', removeCoupon);
+    
+    const inputGroup = couponSection.querySelector('.coupon-input-group');
+    if (inputGroup) {
+        inputGroup.appendChild(removeBtn);
+    }
+}
+
+function setupCouponEventListeners() {
+    const applyBtn = document.getElementById('apply-coupon-btn');
+    const couponInput = document.getElementById('coupon-code');
+    
+    if (applyBtn) {
+        applyBtn.addEventListener('click', applyCoupon);
+    }
+    
+    if (couponInput) {
+        couponInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyCoupon();
+            }
+        });
+    }
+    
+    // Show applied coupon on page load
+    if (appliedCoupon) {
+        const couponInput = document.getElementById('coupon-code');
+        const applyBtn = document.getElementById('apply-coupon-btn');
+        
+        if (couponInput && applyBtn) {
+            couponInput.value = appliedCoupon.code;
+            couponInput.disabled = true;
+            applyBtn.textContent = 'Applied';
+            applyBtn.disabled = true;
+            addRemoveCouponButton();
+            showCouponMessage(`✅ ${appliedCoupon.description} applied`, 'success');
+        }
+    }
 }
 
 // ---------- Checkout ----------
@@ -293,7 +518,8 @@ function setupCheckout() {
                         hostel: hostel || undefined,
                         address,
                         contactInfo,
-                        payment: { method: paymentMethod }
+                        payment: { method: paymentMethod },
+                        coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
                     });
 
                     if (response.success) {
@@ -310,11 +536,39 @@ function setupCheckout() {
                     // Step 1: Calculate total amount
                     const { subtotal, deliveryFee, total } = calculateCartTotals();
                     
+                    // Step 1.5: If total is zero (free order), skip Razorpay and place order directly
+                    if (total <= 0) {
+                        const freeOrderResponse = await api.createGuestOrder({
+                            items: itemsPayload,
+                            customerType,
+                            hostel: hostel || undefined,
+                            address,
+                            contactInfo,
+                            payment: { method: 'online', status: 'paid' },
+                            coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
+                        });
+
+                        if (freeOrderResponse.success) {
+                            triggerOrderPlacedAnimation();
+                            document.getElementById('order-id').textContent = freeOrderResponse.data.orderNumber;
+                            document.getElementById('order-confirmation').classList.remove('hidden');
+                            cart = [];
+                            saveCart();
+                            return;
+                        } else {
+                            throw new Error('Failed to create free order: ' + (freeOrderResponse.message || 'Unknown error'));
+                        }
+                    }
+
                     // Step 2: Create Razorpay order
                     const orderResponse = await fetch('/.netlify/functions/create-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ items: itemsPayload, currency: 'INR' })
+                        body: JSON.stringify({ 
+                            items: itemsPayload, 
+                            currency: 'INR',
+                            coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
+                        })
                     });
                     const orderData = await orderResponse.json();
                     
@@ -339,7 +593,8 @@ function setupCheckout() {
                                     hostel: hostel || undefined,
                                     address,
                                     contactInfo,
-                                    payment: { method: 'online', razorpayOrderId: orderData.order.id }
+                                    payment: { method: 'online', razorpayOrderId: orderData.order.id },
+                                    coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
                                 });
 
                                 if (orderResponse.success) {
@@ -418,7 +673,18 @@ function displayCheckoutItems() {
         }
     }
 
-    const { subtotal, deliveryFee, total } = calculateCartTotals();
+    // Add coupon discount row if coupon is applied
+    const { subtotal, deliveryFee, couponDiscount, total } = calculateCartTotals();
+    if (couponDiscount > 0) {
+        const couponRow = document.createElement('div');
+        couponRow.className = 'summary-row coupon-discount';
+        couponRow.innerHTML = `<span>Discount (${appliedCoupon.code}):</span><span>-₹${couponDiscount.toFixed(2)}</span>`;
+        const orderSummary = document.querySelector('.order-summary');
+        const summaryRows = orderSummary ? orderSummary.querySelectorAll('.summary-row') : [];
+        if (orderSummary && summaryRows.length) {
+            orderSummary.insertBefore(couponRow, summaryRows[summaryRows.length - 1]);
+        }
+    }
     const subtotalEl = document.getElementById('checkout-subtotal');
     const deliveryEl = document.getElementById('checkout-delivery-fee');
     const totalEl = document.getElementById('checkout-total');
@@ -435,6 +701,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadCart();
     displayCart();
     setupCheckout();
+    setupCouponEventListeners();
 });
 
 // Show the order placed animation overlay for ~10 seconds, then hide
@@ -453,3 +720,16 @@ function triggerOrderPlacedAnimation() {
         }, 10000);
     }
 }
+
+// Clear cart and reset all states
+function clearCart() {
+    cart = [];
+    glassBottleAddon = false;
+    appliedCoupon = null;
+    saveCart();
+    displayCart();
+}
+
+// Make functions available globally for testing
+window.clearCart = clearCart;
+window.appliedCoupon = () => appliedCoupon;
