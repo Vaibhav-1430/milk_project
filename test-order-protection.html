@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Protection Test - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
+                <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
+            </div>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div id="auth-container">
+                    <!-- Auth content will be dynamically loaded here -->
+                </div>
+                <div class="cart-icon">
+                    <a href="cart.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 50px 0; min-height: 60vh;">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 30px;">Order Protection Test Page</h1>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- Authentication Status -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Authentication Status</h2>
+                    <div id="auth-status" style="padding: 15px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        Loading...
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                        <button onclick="simulateLogin()" style="padding: 10px 20px; background: #4F46E5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Simulate Login
+                        </button>
+                        <button onclick="simulateLogout()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Simulate Logout
+                        </button>
+                        <button onclick="checkAuthStatus()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Test Actions -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Test Order Protection</h2>
+                    <p>Try these actions to test the authentication protection:</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <!-- Add to Cart Test -->
+                        <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
+                            <h3>Add to Cart</h3>
+                            <p>Test adding items to cart</p>
+                            <button onclick="testAddToCart()" class="add-to-cart" style="width: 100%; padding: 10px; background: #ff6b35; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Add to Cart
+                            </button>
+                        </div>
+
+                        <!-- Checkout Test -->
+                        <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
+                            <h3>Proceed to Checkout</h3>
+                            <p>Test checkout process</p>
+                            <button onclick="testCheckout()" id="checkout-btn" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Checkout
+                            </button>
+                        </div>
+
+                        <!-- Place Order Test -->
+                        <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
+                            <h3>Place Order</h3>
+                            <p>Test order placement</p>
+                            <button onclick="testPlaceOrder()" style="width: 100%; padding: 10px; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Place Order
+                            </button>
+                        </div>
+
+                        <!-- Order Now Test -->
+                        <div style="border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px;">
+                            <h3>Order Now</h3>
+                            <p>Test order now button</p>
+                            <a href="cart.html" class="order-btn" style="display: block; text-align: center; padding: 10px; background: #6f42c1; color: white; text-decoration: none; border-radius: 5px;">
+                                Order Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Results -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h2>Test Results</h2>
+                    <div id="test-results" style="padding: 15px; background: #f8f9fa; border-radius: 5px; min-height: 100px; font-family: monospace; font-size: 14px;">
+                        Test results will appear here...
+                    </div>
+                    <button onclick="clearResults()" style="margin-top: 10px; padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Clear Results
+                    </button>
+                </div>
+
+                <!-- Instructions -->
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h2>Testing Instructions</h2>
+                    <ol>
+                        <li><strong>Start Logged Out:</strong> Click "Simulate Logout" to ensure you're not logged in</li>
+                        <li><strong>Test Protection:</strong> Try clicking any of the order buttons above</li>
+                        <li><strong>See Modal:</strong> You should see a "Login Required" modal</li>
+                        <li><strong>Login:</strong> Click "Login Now" in the modal (or simulate login)</li>
+                        <li><strong>Test Again:</strong> After login, try the order buttons again - they should work</li>
+                        <li><strong>Return URL:</strong> Notice how you're redirected back to this page after login</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        // Test functions
+        function simulateLogin() {
+            const testUser = {
+                id: 1,
+                email: 'test@garamdoodh.com',
+                name: 'Test User'
+            };
+            const testToken = 'test-token-' + Date.now();
+            
+            localStorage.setItem('garamdoodh_user', JSON.stringify(testUser));
+            localStorage.setItem('garamdoodh_token', testToken);
+            
+            // Trigger auth manager update
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+            
+            updateAuthStatus();
+            addTestResult('✅ Login simulated successfully');
+        }
+        
+        function simulateLogout() {
+            localStorage.removeItem('garamdoodh_user');
+            localStorage.removeItem('garamdoodh_token');
+            
+            // Trigger auth manager update
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+            
+            updateAuthStatus();
+            addTestResult('❌ Logout simulated - user is now logged out');
+        }
+        
+        function checkAuthStatus() {
+            updateAuthStatus();
+            addTestResult('🔄 Auth status refreshed');
+        }
+        
+        function updateAuthStatus() {
+            const user = localStorage.getItem('garamdoodh_user');
+            const token = localStorage.getItem('garamdoodh_token');
+            const statusDiv = document.getElementById('auth-status');
+            
+            if (user && token) {
+                const userData = JSON.parse(user);
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> <span style="color: #28a745;">✅ Logged In</span><br>
+                    <strong>User:</strong> ${userData.name} (${userData.email})<br>
+                    <strong>Token:</strong> ${token.substring(0, 20)}...
+                `;
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+            } else {
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> <span style="color: #dc3545;">❌ Not Logged In</span><br>
+                    <strong>User:</strong> None<br>
+                    <strong>Token:</strong> None
+                `;
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.border = '1px solid #f5c6cb';
+            }
+        }
+        
+        function addTestResult(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = 'Test results cleared...\n';
+        }
+        
+        // Test functions for order protection
+        function testAddToCart() {
+            addTestResult('🛒 Testing Add to Cart...');
+            // This will trigger the auth guard
+        }
+        
+        function testCheckout() {
+            addTestResult('💳 Testing Checkout...');
+            // This will trigger the auth guard
+        }
+        
+        function testPlaceOrder() {
+            addTestResult('📦 Testing Place Order...');
+            // This will trigger the auth guard
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus();
+            addTestResult('🚀 Order Protection Test Page Loaded');
+            addTestResult('💡 Try clicking order buttons while logged out to see protection in action');
+        });
+    </script>
+</body>
+</html>

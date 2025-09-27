@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
+                <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
+            </div>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="login.html">Login</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div id="auth-container">
+                    <!-- Auth content will be dynamically loaded here -->
+                </div>
+                <div class="cart-icon">
+                    <a href="cart.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 50px 0; min-height: 60vh;">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 30px;">Authentication Test Page</h1>
+            
+            <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h2>Test Authentication System</h2>
+                <p>This page demonstrates the authentication system with logout functionality.</p>
+                
+                <div style="margin: 20px 0;">
+                    <h3>Current Status:</h3>
+                    <div id="auth-status" style="padding: 15px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        Loading...
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h3>Test Actions:</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="simulateLogin()" style="padding: 10px 20px; background: #4F46E5; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Simulate Login
+                        </button>
+                        <button onclick="checkAuthStatus()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Check Status
+                        </button>
+                        <button onclick="clearAuth()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Clear Auth
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h3>Instructions:</h3>
+                    <ol>
+                        <li>Click "Simulate Login" to test the login functionality</li>
+                        <li>Notice how the header changes to show user menu with logout option</li>
+                        <li>Click on the user menu to see the dropdown with logout button</li>
+                        <li>Click "Logout" to test the logout functionality</li>
+                        <li>Use "Check Status" to see current authentication state</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        // Test functions
+        function simulateLogin() {
+            const testUser = {
+                id: 1,
+                email: 'test@garamdoodh.com',
+                name: 'Test User'
+            };
+            const testToken = 'test-token-' + Date.now();
+            
+            localStorage.setItem('garamdoodh_user', JSON.stringify(testUser));
+            localStorage.setItem('garamdoodh_token', testToken);
+            
+            // Trigger auth manager update
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+            
+            updateAuthStatus();
+            alert('Login simulated! Check the header for user menu.');
+        }
+        
+        function checkAuthStatus() {
+            updateAuthStatus();
+        }
+        
+        function clearAuth() {
+            localStorage.removeItem('garamdoodh_user');
+            localStorage.removeItem('garamdoodh_token');
+            
+            // Trigger auth manager update
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+            
+            updateAuthStatus();
+            alert('Authentication cleared!');
+        }
+        
+        function updateAuthStatus() {
+            const user = localStorage.getItem('garamdoodh_user');
+            const token = localStorage.getItem('garamdoodh_token');
+            const statusDiv = document.getElementById('auth-status');
+            
+            if (user && token) {
+                const userData = JSON.parse(user);
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> Logged In<br>
+                    <strong>User:</strong> ${userData.name} (${userData.email})<br>
+                    <strong>Token:</strong> ${token.substring(0, 20)}...
+                `;
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+            } else {
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> Not Logged In<br>
+                    <strong>User:</strong> None<br>
+                    <strong>Token:</strong> None
+                `;
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.border = '1px solid #f5c6cb';
+            }
+        }
+        
+        // Initialize status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus();
+        });
+    </script>
+</body>
+</html>

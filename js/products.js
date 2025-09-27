@@ -126,6 +126,11 @@ function addProductEventListeners() {
     // Add to cart buttons
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function() {
+            // Check authentication before adding to cart
+            if (window.authGuard && !window.authGuard.requireAuth('add items to cart', window.location.href)) {
+                return;
+            }
+            
             const productCard = this.closest('.product-card');
             const productId = parseInt(productCard.dataset.id);
             const quantity = parseInt(productCard.querySelector('.quantity-input').value);

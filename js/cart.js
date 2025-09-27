@@ -449,7 +449,12 @@ function setupCheckout() {
     const checkoutBtn = document.getElementById('checkout-btn');
     if (!checkoutBtn) return;
 
-    checkoutBtn.addEventListener('click', function () {
+    checkoutBtn.addEventListener('click', function (e) {
+        // Check authentication before proceeding to checkout
+        if (window.authGuard && !window.authGuard.requireAuth('proceed to checkout', window.location.href)) {
+            return;
+        }
+
         const checkoutFormSection = document.getElementById('checkout-form-section');
         const cartSection = document.querySelector('.cart-section');
 
@@ -480,6 +485,12 @@ function setupCheckout() {
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            
+            // Check authentication before placing order
+            if (window.authGuard && !window.authGuard.requireAuth('place this order', window.location.href)) {
+                return;
+            }
+            
             const submitBtn = checkoutForm.querySelector('button[type="submit"]');
             if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Placing...'; }
 
