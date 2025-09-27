@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Debug - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .debug-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status-good { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-warning { color: #ffc107; }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #3730A3;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Database Connection Debug Tool</h1>
+        
+        <!-- Database Status -->
+        <div class="debug-section">
+            <h2>📊 Database Status</h2>
+            <div id="db-status">
+                <p>Checking database connection...</p>
+            </div>
+            <button class="test-button" onclick="testDatabaseConnection()">Test Database Connection</button>
+        </div>
+
+        <!-- Environment Variables -->
+        <div class="debug-section">
+            <h2>🔧 Environment Configuration</h2>
+            <p><strong>Database URI:</strong> <span class="status-warning">mongodb+srv://2024244563vaibhav_db_user:21abLqaeW66FqStq@cluster0.mongodb.net/garamdoodh</span></p>
+            <p><strong>Database Name:</strong> garamdoodh</p>
+            <p><strong>Collection:</strong> users</p>
+        </div>
+
+        <!-- Test User Creation -->
+        <div class="debug-section">
+            <h2>👤 Test User Creation</h2>
+            <p>Create a test user to verify database connectivity:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                <input type="text" id="testName" placeholder="Test Name" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="email" id="testEmail" placeholder="Test Email" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="tel" id="testPhone" placeholder="Test Phone" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="password" id="testPassword" placeholder="Test Password" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <div style="margin: 15px 0;">
+                <label>
+                    <input type="radio" name="customerType" value="college" checked> College Student
+                </label>
+                <label style="margin-left: 20px;">
+                    <input type="radio" name="customerType" value="outsider"> Local Resident
+                </label>
+            </div>
+            <input type="text" id="testAddress" placeholder="Test Address" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin: 10px 0;">
+            <button class="test-button" onclick="createTestUser()">Create Test User</button>
+        </div>
+
+        <!-- API Test Results -->
+        <div class="debug-section">
+            <h2>📡 API Test Results</h2>
+            <div id="api-results" class="code-block">
+                API test results will appear here...
+            </div>
+            <button class="test-button" onclick="testAllEndpoints()">Test All Endpoints</button>
+        </div>
+
+        <!-- Database Query Test -->
+        <div class="debug-section">
+            <h2>🔍 Database Query Test</h2>
+            <p>Test if we can retrieve users from the database:</p>
+            <button class="test-button" onclick="testUserRetrieval()">Get All Users</button>
+            <button class="test-button" onclick="testUserCount()">Get User Count</button>
+            <div id="query-results" class="code-block">
+                Query results will appear here...
+            </div>
+        </div>
+
+        <!-- Troubleshooting Guide -->
+        <div class="debug-section">
+            <h2>🛠️ Troubleshooting Guide</h2>
+            <h3>Common Issues & Solutions:</h3>
+            <ol>
+                <li><strong>MongoDB Atlas Connection Issues:</strong>
+                    <ul>
+                        <li>Check if your IP address is whitelisted in MongoDB Atlas</li>
+                        <li>Verify your database user credentials</li>
+                        <li>Ensure the database name is correct (garamdoodh)</li>
+                    </ul>
+                </li>
+                <li><strong>Netlify Environment Variables:</strong>
+                    <ul>
+                        <li>Make sure MONGODB_URI is set in Netlify dashboard</li>
+                        <li>Check JWT_SECRET is configured</li>
+                        <li>Verify all environment variables are properly set</li>
+                    </ul>
+                </li>
+                <li><strong>Function Deployment:</strong>
+                    <ul>
+                        <li>Ensure your Netlify functions are properly deployed</li>
+                        <li>Check function logs in Netlify dashboard</li>
+                        <li>Verify the function endpoints are accessible</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <!-- MongoDB Atlas Access -->
+        <div class="debug-section">
+            <h2>🌐 MongoDB Atlas Access</h2>
+            <p>To check your database directly:</p>
+            <ol>
+                <li>Go to <a href="https://cloud.mongodb.com" target="_blank">MongoDB Atlas</a></li>
+                <li>Login with your credentials</li>
+                <li>Navigate to your cluster</li>
+                <li>Click "Browse Collections"</li>
+                <li>Look for the "garamdoodh" database</li>
+                <li>Check the "users" collection</li>
+            </ol>
+            <p><strong>Database Details:</strong></p>
+            <div class="code-block">
+                Database: garamdoodh
+                Collection: users
+                Connection String: mongodb+srv://2024244563vaibhav_db_user:21abLqaeW66FqStq@cluster0.mongodb.net/garamdoodh
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('api-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#6c757d';
+            resultsDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function addQueryResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('query-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#6c757d';
+            resultsDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        async function testDatabaseConnection() {
+            addResult('🔍 Testing database connection...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/db-test');
+                const result = await response.json();
+                
+                if (result.success) {
+                    addResult('✅ Database connection successful!', 'success');
+                    addResult(`📊 Connection details: ${JSON.stringify(result.data, null, 2)}`, 'success');
+                    document.getElementById('db-status').innerHTML = '<p class="status-good">✅ Database Connected Successfully</p>';
+                } else {
+                    addResult(`❌ Database connection failed: ${result.message}`, 'error');
+                    document.getElementById('db-status').innerHTML = '<p class="status-error">❌ Database Connection Failed</p>';
+                }
+            } catch (error) {
+                addResult(`💥 Network error: ${error.message}`, 'error');
+                document.getElementById('db-status').innerHTML = '<p class="status-error">❌ Network Error</p>';
+            }
+        }
+
+        async function createTestUser() {
+            const name = document.getElementById('testName').value || 'Test User';
+            const email = document.getElementById('testEmail').value || `test${Date.now()}@example.com`;
+            const phone = document.getElementById('testPhone').value || '9876543210';
+            const password = document.getElementById('testPassword').value || 'test123';
+            const customerType = document.querySelector('input[name="customerType"]:checked').value;
+            const address = document.getElementById('testAddress').value || 'Test Address';
+
+            addResult('👤 Creating test user...');
+            addResult(`📝 User data: ${JSON.stringify({name, email, phone, customerType, address}, null, 2)}`);
+
+            try {
+                const response = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone,
+                        password,
+                        customerType,
+                        address
+                    })
+                });
+
+                const result = await response.json();
+                addResult(`📊 Response status: ${response.status}`);
+                addResult(`📋 Response data: ${JSON.stringify(result, null, 2)}`);
+
+                if (result.success) {
+                    addResult('✅ Test user created successfully!', 'success');
+                    addResult(`🆔 User ID: ${result.data.user._id}`, 'success');
+                } else {
+                    addResult(`❌ User creation failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllEndpoints() {
+            addResult('🧪 Testing all API endpoints...');
+            
+            const endpoints = [
+                { name: 'Health Check', url: '/.netlify/functions/health' },
+                { name: 'Database Test', url: '/.netlify/functions/db-test' },
+                { name: 'Auth Register', url: '/.netlify/functions/auth-register', method: 'POST' },
+                { name: 'Auth Login', url: '/.netlify/functions/auth-login', method: 'POST' }
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    addResult(`🔍 Testing ${endpoint.name}...`);
+                    const options = {
+                        method: endpoint.method || 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    
+                    if (endpoint.method === 'POST') {
+                        options.body = JSON.stringify({
+                            name: 'Test User',
+                            email: `test${Date.now()}@example.com`,
+                            phone: '9876543210',
+                            password: 'test123',
+                            customerType: 'outsider',
+                            address: 'Test Address'
+                        });
+                    }
+
+                    const response = await fetch(endpoint.url, options);
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        addResult(`✅ ${endpoint.name}: OK (${response.status})`, 'success');
+                    } else {
+                        addResult(`⚠️ ${endpoint.name}: ${response.status} - ${result.message}`, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ${endpoint.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testUserRetrieval() {
+            addQueryResult('🔍 Testing user retrieval...');
+            
+            try {
+                // This would require a custom endpoint to get users
+                // For now, we'll test with a simple health check
+                const response = await fetch('/.netlify/functions/health');
+                const result = await response.json();
+                
+                if (result.success) {
+                    addQueryResult('✅ API is responding correctly', 'success');
+                    addQueryResult('💡 To see users, check MongoDB Atlas directly or create a custom endpoint', 'info');
+                } else {
+                    addQueryResult('❌ API not responding', 'error');
+                }
+            } catch (error) {
+                addQueryResult(`💥 Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUserCount() {
+            addQueryResult('🔢 Testing user count...');
+            addQueryResult('💡 This would require a custom endpoint to count users', 'info');
+            addQueryResult('💡 Check MongoDB Atlas directly for user count', 'info');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 Database Debug Tool Loaded');
+            addResult('💡 Click "Test Database Connection" to start debugging');
+        });
+    </script>
+</body>
+</html>
