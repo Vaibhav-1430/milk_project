@@ -167,6 +167,8 @@ class LoginManager {
     // API call to backend
     async callLoginAPI(email, password) {
         try {
+            console.log('Attempting login for:', email);
+            
             const response = await fetch('/.netlify/functions/auth-login', {
                 method: 'POST',
                 headers: {
@@ -175,7 +177,9 @@ class LoginManager {
                 body: JSON.stringify({ email, password })
             });
 
+            console.log('Login response status:', response.status);
             const data = await response.json();
+            console.log('Login response data:', data);
 
             if (response.ok && data.success) {
                 return {
@@ -186,14 +190,14 @@ class LoginManager {
             } else {
                 return {
                     success: false,
-                    message: data.message || 'Login failed'
+                    message: data.message || `Login failed (${response.status})`
                 };
             }
         } catch (error) {
             console.error('Login error:', error);
             return {
                 success: false,
-                message: 'Network error. Please try again.'
+                message: `Network error: ${error.message}`
             };
         }
     }

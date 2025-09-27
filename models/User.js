@@ -15,14 +15,26 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
     },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple null values
+    },
+    picture: {
+        type: String
+    },
     phone: {
         type: String,
-        required: [true, 'Phone number is required'],
+        required: function() {
+            return !this.googleId; // Not required for Google OAuth users
+        },
         match: [/^[6-9]\d{9}$/, 'Please enter a valid 10-digit phone number']
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
+        required: function() {
+            return !this.googleId; // Not required for Google OAuth users
+        },
         minlength: [6, 'Password must be at least 6 characters']
     },
     role: {

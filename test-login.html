@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .test-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #3730A3;
+        }
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
+                <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
+            </div>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="signup.html">Signup</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div id="auth-container">
+                    <!-- Auth content will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 50px 0;">
+        <div class="test-container">
+            <h1>🔐 Login System Test Page</h1>
+            
+            <!-- Current Auth Status -->
+            <div class="test-section">
+                <h2>Current Authentication Status</h2>
+                <div id="auth-status" class="results">
+                    Loading...
+                </div>
+                <button class="test-button" onclick="checkAuthStatus()">Refresh Status</button>
+                <button class="test-button" onclick="clearAuth()">Clear Auth</button>
+            </div>
+
+            <!-- Test Login Form -->
+            <div class="test-section">
+                <h2>Test Login</h2>
+                <p>Test login with existing user credentials:</p>
+                <div class="test-form">
+                    <input type="email" id="testEmail" placeholder="Email" value="test@example.com">
+                    <input type="password" id="testPassword" placeholder="Password" value="test123">
+                </div>
+                <button class="test-button" onclick="testLogin()">Test Login</button>
+                <button class="test-button" onclick="testLoginAPI()">Test API Directly</button>
+            </div>
+
+            <!-- Test Results -->
+            <div class="test-section">
+                <h2>Test Results</h2>
+                <div id="test-results" class="results">
+                    Test results will appear here...
+                </div>
+                <button class="test-button" onclick="clearResults()">Clear Results</button>
+            </div>
+
+            <!-- API Endpoint Tests -->
+            <div class="test-section">
+                <h2>API Endpoint Tests</h2>
+                <button class="test-button" onclick="testHealthEndpoint()">Test Health</button>
+                <button class="test-button" onclick="testDatabaseEndpoint()">Test Database</button>
+                <button class="test-button" onclick="testLoginEndpoint()">Test Login Endpoint</button>
+                <button class="test-button" onclick="testAllEndpoints()">Test All Endpoints</button>
+            </div>
+
+            <!-- Google OAuth Test -->
+            <div class="test-section">
+                <h2>Google OAuth Test</h2>
+                <p>Test Google authentication (requires Google Client ID setup):</p>
+                <button class="test-button" onclick="testGoogleAuth()">Test Google Auth</button>
+                <div id="google-results" class="results">
+                    Google OAuth results will appear here...
+                </div>
+            </div>
+
+            <!-- Debug Information -->
+            <div class="test-section">
+                <h2>Debug Information</h2>
+                <div id="debug-info" class="results">
+                    Debug information will appear here...
+                </div>
+                <button class="test-button" onclick="showDebugInfo()">Show Debug Info</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            resultsDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function addGoogleResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('google-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            resultsDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function addDebugInfo(message) {
+            const resultsDiv = document.getElementById('debug-info');
+            resultsDiv.innerHTML += `<div>${message}</div>`;
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = 'Test results cleared...\n';
+        }
+
+        function checkAuthStatus() {
+            const user = localStorage.getItem('garamdoodh_user');
+            const token = localStorage.getItem('garamdoodh_token');
+            const statusDiv = document.getElementById('auth-status');
+            
+            if (user && token) {
+                const userData = JSON.parse(user);
+                statusDiv.innerHTML = `
+                    <div class="success">✅ Logged In</div>
+                    <div>User: ${userData.name} (${userData.email})</div>
+                    <div>Token: ${token.substring(0, 20)}...</div>
+                    <div>Customer Type: ${userData.customerType || 'Not specified'}</div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="error">❌ Not Logged In</div>
+                    <div>User: None</div>
+                    <div>Token: None</div>
+                `;
+            }
+            
+            // Update auth manager
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('garamdoodh_user');
+            localStorage.removeItem('garamdoodh_token');
+            checkAuthStatus();
+            addResult('Auth data cleared', 'info');
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            
+            if (!email || !password) {
+                addResult('Please enter email and password', 'error');
+                return;
+            }
+            
+            addResult(`Testing login for: ${email}`);
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                addResult(`Response status: ${response.status}`);
+                addResult(`Response data: ${JSON.stringify(result, null, 2)}`);
+
+                if (result.success) {
+                    addResult('✅ Login successful!', 'success');
+                    
+                    // Store user data
+                    localStorage.setItem('garamdoodh_user', JSON.stringify(result.data.user));
+                    localStorage.setItem('garamdoodh_token', result.data.token);
+                    
+                    checkAuthStatus();
+                } else {
+                    addResult(`❌ Login failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoginAPI() {
+            addResult('Testing login API directly...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'test123'
+                    })
+                });
+
+                const result = await response.json();
+                addResult(`Direct API test - Status: ${response.status}`);
+                addResult(`Direct API test - Data: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Direct API test - Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHealthEndpoint() {
+            addResult('Testing health endpoint...');
+            try {
+                const response = await fetch('/.netlify/functions/health');
+                const result = await response.json();
+                addResult(`Health endpoint - Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Health endpoint - Data: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Health endpoint - Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabaseEndpoint() {
+            addResult('Testing database endpoint...');
+            try {
+                const response = await fetch('/.netlify/functions/db-test');
+                const result = await response.json();
+                addResult(`Database endpoint - Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Database endpoint - Data: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Database endpoint - Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoginEndpoint() {
+            addResult('Testing login endpoint...');
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@example.com', password: 'test123' })
+                });
+                const result = await response.json();
+                addResult(`Login endpoint - Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Login endpoint - Data: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Login endpoint - Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllEndpoints() {
+            addResult('🧪 Testing all endpoints...');
+            await testHealthEndpoint();
+            await testDatabaseEndpoint();
+            await testLoginEndpoint();
+        }
+
+        function testGoogleAuth() {
+            addGoogleResult('Google OAuth test started...');
+            addGoogleResult('⚠️ Note: Google OAuth requires proper Client ID setup', 'error');
+            addGoogleResult('1. Go to Google Cloud Console', 'info');
+            addGoogleResult('2. Create OAuth 2.0 credentials', 'info');
+            addGoogleResult('3. Add your domain to authorized origins', 'info');
+            addGoogleResult('4. Replace YOUR_GOOGLE_CLIENT_ID in login.html', 'info');
+        }
+
+        function showDebugInfo() {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML = '';
+            
+            addDebugInfo('=== Debug Information ===');
+            addDebugInfo(`Current URL: ${window.location.href}`);
+            addDebugInfo(`User Agent: ${navigator.userAgent}`);
+            addDebugInfo(`Local Storage Keys: ${Object.keys(localStorage).join(', ')}`);
+            addDebugInfo(`Auth Manager Available: ${typeof window.authManager !== 'undefined'}`);
+            addDebugInfo(`Auth Guard Available: ${typeof window.authGuard !== 'undefined'}`);
+            
+            // Check environment
+            if (window.location.hostname === 'localhost') {
+                addDebugInfo('Environment: Local Development');
+            } else {
+                addDebugInfo('Environment: Production');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            addResult('🚀 Login Test Page Loaded');
+            addResult('💡 Use the test form above to test login functionality');
+        });
+    </script>
+</body>
+</html>
