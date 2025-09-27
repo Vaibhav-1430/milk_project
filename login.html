@@ -300,6 +300,12 @@
                     cancel_on_tap_outside: true
                 });
                 
+                // Show error if client ID is not configured
+                if (google.accounts.id.getClientId() === 'YOUR_GOOGLE_CLIENT_ID') {
+                    showNotification('Google OAuth not configured. Please set up Google Client ID.', 'error');
+                    return;
+                }
+                
                 google.accounts.id.prompt();
             } else {
                 showNotification('Google Sign-In not available. Please try again.', 'error');

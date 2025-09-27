@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Debug - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .debug-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #3730A3;
+        }
+        .test-button.danger {
+            background: #dc3545;
+        }
+        .test-button.danger:hover {
+            background: #c82333;
+        }
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #6c757d; }
+        .step {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Login Debug Tool</h1>
+        
+        <!-- Step-by-Step Debugging -->
+        <div class="debug-section">
+            <h2>📋 Step-by-Step Debugging</h2>
+            <div class="step">
+                <strong>Step 1:</strong> Test if your signup credentials exist in the database
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> Test the login API with your exact credentials
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Check password hashing and comparison
+            </div>
+            <div class="step">
+                <strong>Step 4:</strong> Verify authentication flow
+            </div>
+        </div>
+
+        <!-- Test Login with Your Credentials -->
+        <div class="debug-section">
+            <h2>🔐 Test Login with Your Credentials</h2>
+            <p>Enter the exact email and password you used during signup:</p>
+            
+            <div class="form-group">
+                <label>Email (exact from signup):</label>
+                <input type="email" id="debugEmail" placeholder="Enter your signup email">
+            </div>
+            
+            <div class="form-group">
+                <label>Password (exact from signup):</label>
+                <input type="password" id="debugPassword" placeholder="Enter your signup password">
+            </div>
+            
+            <button class="test-button" onclick="testLoginWithCredentials()">Test Login</button>
+            <button class="test-button" onclick="checkUserInDatabase()">Check User in Database</button>
+            <button class="test-button danger" onclick="clearAllData()">Clear All Data</button>
+        </div>
+
+        <!-- Database User Check -->
+        <div class="debug-section">
+            <h2>👥 Database User Check</h2>
+            <p>Check if your user exists in the database:</p>
+            <button class="test-button" onclick="listAllUsers()">List All Users</button>
+            <button class="test-button" onclick="checkSpecificUser()">Check Specific User</button>
+        </div>
+
+        <!-- API Testing -->
+        <div class="debug-section">
+            <h2>🔌 API Testing</h2>
+            <button class="test-button" onclick="testAllAPIs()">Test All APIs</button>
+            <button class="test-button" onclick="testLoginAPI()">Test Login API</button>
+            <button class="test-button" onclick="testSignupAPI()">Test Signup API</button>
+        </div>
+
+        <!-- Results -->
+        <div class="debug-section">
+            <h2>📊 Debug Results</h2>
+            <div id="debug-results" class="results">
+                Debug results will appear here...
+            </div>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <!-- Common Issues -->
+        <div class="debug-section">
+            <h2>🚨 Common Login Issues & Solutions</h2>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <h4>Issue 1: "Invalid credentials"</h4>
+                <ul>
+                    <li>Check if email is exactly the same (case-sensitive)</li>
+                    <li>Verify password is exactly the same</li>
+                    <li>Check if user exists in database</li>
+                </ul>
+            </div>
+            
+            <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <h4>Issue 2: "User not found"</h4>
+                <ul>
+                    <li>Signup might have failed silently</li>
+                    <li>Check database connection during signup</li>
+                    <li>Verify signup API response</li>
+                </ul>
+            </div>
+            
+            <div style="background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <h4>Issue 3: "Password mismatch"</h4>
+                <ul>
+                    <li>Password hashing might be inconsistent</li>
+                    <li>Check bcrypt comparison in backend</li>
+                    <li>Verify password field in database</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('debug-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            resultsDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('debug-results').innerHTML = 'Debug results cleared...\n';
+        }
+
+        async function testLoginWithCredentials() {
+            const email = document.getElementById('debugEmail').value;
+            const password = document.getElementById('debugPassword').value;
+            
+            if (!email || !password) {
+                addResult('Please enter both email and password', 'error');
+                return;
+            }
+            
+            addResult(`🔍 Testing login with credentials: ${email}`, 'info');
+            addResult(`📝 Password length: ${password.length} characters`, 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                addResult(`📊 Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`📋 Response Data: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    addResult('✅ Login successful!', 'success');
+                    addResult(`👤 User: ${result.data.user.name} (${result.data.user.email})`, 'success');
+                    addResult(`🔑 Token: ${result.data.token.substring(0, 20)}...`, 'success');
+                    
+                    // Store auth data
+                    localStorage.setItem('garamdoodh_user', JSON.stringify(result.data.user));
+                    localStorage.setItem('garamdoodh_token', result.data.token);
+                } else {
+                    addResult(`❌ Login failed: ${result.message}`, 'error');
+                    
+                    // Provide specific troubleshooting
+                    if (result.message.includes('Invalid credentials')) {
+                        addResult('💡 Troubleshooting: Check if email and password are exactly correct', 'warning');
+                        addResult('💡 Try checking if user exists in database', 'warning');
+                    }
+                }
+            } catch (error) {
+                addResult(`💥 Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkUserInDatabase() {
+            const email = document.getElementById('debugEmail').value;
+            
+            if (!email) {
+                addResult('Please enter email to check', 'error');
+                return;
+            }
+            
+            addResult(`🔍 Checking if user exists in database: ${email}`, 'info');
+            
+            // Since we don't have a direct user lookup endpoint, we'll try to create a test user
+            // and see if it fails due to duplicate email
+            try {
+                const response = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: email,
+                        phone: '9876543210',
+                        password: 'test123',
+                        customerType: 'outsider',
+                        address: 'Test Address'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.message && result.message.includes('already exists')) {
+                    addResult('✅ User exists in database!', 'success');
+                    addResult('💡 The issue might be with password comparison', 'warning');
+                } else if (result.success) {
+                    addResult('❌ User does not exist in database', 'error');
+                    addResult('💡 Try signing up again with the same credentials', 'warning');
+                } else {
+                    addResult(`📋 Response: ${result.message}`, 'info');
+                }
+            } catch (error) {
+                addResult(`💥 Error checking user: ${error.message}`, 'error');
+            }
+        }
+
+        async function listAllUsers() {
+            addResult('🔍 Attempting to list users...', 'info');
+            addResult('💡 Note: This requires a custom endpoint to list users', 'warning');
+            addResult('💡 Check MongoDB Atlas directly to see all users', 'info');
+        }
+
+        async function checkSpecificUser() {
+            const email = document.getElementById('debugEmail').value;
+            if (!email) {
+                addResult('Please enter email first', 'error');
+                return;
+            }
+            await checkUserInDatabase();
+        }
+
+        async function testAllAPIs() {
+            addResult('🧪 Testing all APIs...', 'info');
+            await testLoginAPI();
+            await testSignupAPI();
+        }
+
+        async function testLoginAPI() {
+            addResult('🔌 Testing login API...', 'info');
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@example.com', password: 'test123' })
+                });
+                const result = await response.json();
+                addResult(`Login API Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Login API Response: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Login API Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSignupAPI() {
+            addResult('🔌 Testing signup API...', 'info');
+            try {
+                const response = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: `test${Date.now()}@example.com`,
+                        phone: '9876543210',
+                        password: 'test123',
+                        customerType: 'outsider',
+                        address: 'Test Address'
+                    })
+                });
+                const result = await response.json();
+                addResult(`Signup API Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Signup API Response: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Signup API Error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            localStorage.clear();
+            addResult('🗑️ All local data cleared', 'warning');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 Login Debug Tool Loaded');
+            addResult('💡 Enter your signup credentials above to test login');
+        });
+    </script>
+</body>
+</html>
