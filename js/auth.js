@@ -84,11 +84,16 @@ class AuthManager {
                 </div>
             `;
         } else {
-            // Show login button
+            // Show login and signup buttons
             authContainer.innerHTML = `
-                <a href="login.html" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </a>
+                <div class="auth-buttons">
+                    <a href="login.html" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="signup.html" class="signup-btn">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </div>
             `;
         }
 

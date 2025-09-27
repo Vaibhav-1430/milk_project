@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Test - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/garam-doodh-logo.png" alt="Garam Doodh Logo" class="logo-img">
+                <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
+            </div>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="signup.html">Signup</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div id="auth-container">
+                    <!-- Auth content will be dynamically loaded here -->
+                </div>
+                <div class="cart-icon">
+                    <a href="cart.html"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 50px 0; min-height: 60vh;">
+        <div class="container">
+            <h1 style="text-align: center; margin-bottom: 30px;">Signup System Test Page</h1>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- Authentication Status -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Current Authentication Status</h2>
+                    <div id="auth-status" style="padding: 15px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        Loading...
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                        <button onclick="simulateLogout()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Logout
+                        </button>
+                        <button onclick="checkAuthStatus()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Test Signup Form -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Test Signup Form</h2>
+                    <p>Fill out this form to test the signup functionality:</p>
+                    
+                    <form id="testSignupForm" style="margin-top: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Full Name</label>
+                                <input type="text" id="testName" name="name" placeholder="Enter your full name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email</label>
+                                <input type="email" id="testEmail" name="email" placeholder="Enter your email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Phone</label>
+                                <input type="tel" id="testPhone" name="phone" placeholder="Enter your phone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Customer Type</label>
+                                <select id="testCustomerType" name="customerType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                                    <option value="">Select type</option>
+                                    <option value="college">College Student</option>
+                                    <option value="outsider">Local Resident</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="testHostelField" style="margin-bottom: 15px; display: none;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Hostel Name</label>
+                            <input type="text" id="testHostel" name="hostel" placeholder="Enter hostel name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Address</label>
+                            <textarea id="testAddress" name="address" placeholder="Enter your delivery address" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;" required></textarea>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Password</label>
+                                <input type="password" id="testPassword" name="password" placeholder="Enter password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Confirm Password</label>
+                                <input type="password" id="testConfirmPassword" name="confirmPassword" placeholder="Confirm password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="testTerms" name="terms" required>
+                                <span>I agree to the terms and conditions</span>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" style="width: 100%; padding: 12px; background: #4F46E5; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                            Test Signup
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Test Results -->
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h2>Test Results</h2>
+                    <div id="test-results" style="padding: 15px; background: #f8f9fa; border-radius: 5px; min-height: 100px; font-family: monospace; font-size: 14px; max-height: 300px; overflow-y: auto;">
+                        Test results will appear here...
+                    </div>
+                    <button onclick="clearResults()" style="margin-top: 10px; padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Clear Results
+                    </button>
+                </div>
+
+                <!-- Instructions -->
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h2>Testing Instructions</h2>
+                    <ol>
+                        <li><strong>Fill the form:</strong> Complete all required fields in the test form above</li>
+                        <li><strong>Test validation:</strong> Try submitting with missing fields to test validation</li>
+                        <li><strong>Test signup:</strong> Submit with valid data to test the signup process</li>
+                        <li><strong>Check backend:</strong> Verify the signup request reaches your backend</li>
+                        <li><strong>Test login:</strong> After successful signup, try logging in with the new account</li>
+                        <li><strong>Test order protection:</strong> Verify the new user can place orders</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script>
+        // Test functions
+        function simulateLogout() {
+            localStorage.removeItem('garamdoodh_user');
+            localStorage.removeItem('garamdoodh_token');
+            
+            // Trigger auth manager update
+            if (window.authManager) {
+                window.authManager.loadUserData();
+                window.authManager.updateNavigation();
+            }
+            
+            updateAuthStatus();
+            addTestResult('❌ Logout simulated - user is now logged out');
+        }
+        
+        function checkAuthStatus() {
+            updateAuthStatus();
+            addTestResult('🔄 Auth status refreshed');
+        }
+        
+        function updateAuthStatus() {
+            const user = localStorage.getItem('garamdoodh_user');
+            const token = localStorage.getItem('garamdoodh_token');
+            const statusDiv = document.getElementById('auth-status');
+            
+            if (user && token) {
+                const userData = JSON.parse(user);
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> <span style="color: #28a745;">✅ Logged In</span><br>
+                    <strong>User:</strong> ${userData.name} (${userData.email})<br>
+                    <strong>Token:</strong> ${token.substring(0, 20)}...<br>
+                    <strong>Customer Type:</strong> ${userData.customerType || 'Not specified'}
+                `;
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+            } else {
+                statusDiv.innerHTML = `
+                    <strong>Status:</strong> <span style="color: #dc3545;">❌ Not Logged In</span><br>
+                    <strong>User:</strong> None<br>
+                    <strong>Token:</strong> None
+                `;
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.border = '1px solid #f5c6cb';
+            }
+        }
+        
+        function addTestResult(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = 'Test results cleared...\n';
+        }
+        
+        // Customer type change handler
+        document.getElementById('testCustomerType').addEventListener('change', function() {
+            const hostelField = document.getElementById('testHostelField');
+            const hostelInput = document.getElementById('testHostel');
+            
+            if (this.value === 'college') {
+                hostelField.style.display = 'block';
+                hostelInput.required = true;
+            } else {
+                hostelField.style.display = 'none';
+                hostelInput.required = false;
+                hostelInput.value = '';
+            }
+        });
+        
+        // Test signup form submission
+        document.getElementById('testSignupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            addTestResult('🚀 Starting signup test...');
+            addTestResult(`📝 Form data: ${JSON.stringify(data, null, 2)}`);
+            
+            // Validate form
+            if (!validateTestForm(data)) {
+                return;
+            }
+            
+            try {
+                addTestResult('📡 Sending signup request to backend...');
+                
+                const response = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone,
+                        password: data.password,
+                        customerType: data.customerType,
+                        hostel: data.customerType === 'college' ? data.hostel : undefined,
+                        address: data.address
+                    })
+                });
+
+                const result = await response.json();
+                addTestResult(`📊 Response status: ${response.status}`);
+                addTestResult(`📋 Response data: ${JSON.stringify(result, null, 2)}`);
+
+                if (result.success) {
+                    addTestResult('✅ Signup successful!');
+                    addTestResult('💾 Storing user data...');
+                    
+                    // Store user data
+                    localStorage.setItem('garamdoodh_user', JSON.stringify(result.data.user));
+                    localStorage.setItem('garamdoodh_token', result.data.token);
+                    
+                    // Update auth status
+                    if (window.authManager) {
+                        window.authManager.loadUserData();
+                        window.authManager.updateNavigation();
+                    }
+                    
+                    updateAuthStatus();
+                    addTestResult('🎉 User is now logged in!');
+                    
+                    // Clear form
+                    this.reset();
+                    document.getElementById('testHostelField').style.display = 'none';
+                    
+                } else {
+                    addTestResult(`❌ Signup failed: ${result.message}`);
+                }
+            } catch (error) {
+                addTestResult(`💥 Network error: ${error.message}`);
+            }
+        });
+        
+        function validateTestForm(data) {
+            // Check required fields
+            const requiredFields = ['name', 'email', 'phone', 'customerType', 'address', 'password', 'confirmPassword'];
+            for (let field of requiredFields) {
+                if (!data[field] || data[field].trim() === '') {
+                    addTestResult(`❌ Validation failed: ${field} is required`);
+                    return false;
+                }
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(data.email)) {
+                addTestResult('❌ Validation failed: Invalid email format');
+                return false;
+            }
+            
+            // Phone validation
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(data.phone.replace(/\D/g, ''))) {
+                addTestResult('❌ Validation failed: Invalid phone number');
+                return false;
+            }
+            
+            // Password validation
+            if (data.password.length < 6) {
+                addTestResult('❌ Validation failed: Password too short');
+                return false;
+            }
+            
+            // Confirm password
+            if (data.password !== data.confirmPassword) {
+                addTestResult('❌ Validation failed: Passwords do not match');
+                return false;
+            }
+            
+            // Terms
+            if (!document.getElementById('testTerms').checked) {
+                addTestResult('❌ Validation failed: Terms not accepted');
+                return false;
+            }
+            
+            addTestResult('✅ Form validation passed');
+            return true;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus();
+            addTestResult('🚀 Signup Test Page Loaded');
+            addTestResult('💡 Fill out the form above to test the signup functionality');
+        });
+    </script>
+</body>
+</html>

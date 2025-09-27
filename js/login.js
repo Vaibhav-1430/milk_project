@@ -131,8 +131,8 @@ class LoginManager {
         try {
             this.showNotification('Logging in...', 'info');
             
-            // Replace this with actual API call
-            const response = await this.simulateApiCall(email, password);
+            // Use backend API call
+            const response = await this.callLoginAPI(email, password);
             
             if (response.success) {
                 this.showNotification('Login successful! Redirecting...', 'success');
@@ -164,7 +164,41 @@ class LoginManager {
         }
     }
 
-    // Simulate API call - replace with actual implementation
+    // API call to backend
+    async callLoginAPI(email, password) {
+        try {
+            const response = await fetch('/.netlify/functions/auth-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                return {
+                    success: true,
+                    user: data.data.user,
+                    token: data.data.token
+                };
+            } else {
+                return {
+                    success: false,
+                    message: data.message || 'Login failed'
+                };
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            return {
+                success: false,
+                message: 'Network error. Please try again.'
+            };
+        }
+    }
+
+    // Simulate API call - fallback for testing
     async simulateApiCall(email, password) {
         return new Promise((resolve) => {
             setTimeout(() => {

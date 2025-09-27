@@ -1604,6 +1604,32 @@ footer {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
+.auth-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.signup-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--secondary);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.signup-btn:hover {
+    background: var(--secondary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
 .user-menu {
     position: relative;
     display: flex;
@@ -1701,9 +1727,19 @@ footer {
         gap: 10px;
     }
     
+    .auth-buttons {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
     .login-btn {
         padding: 6px 12px;
         font-size: 13px;
+    }
+    
+    .signup-btn {
+        padding: 6px 12px;
+        font-size: 12px;
     }
     
     .user-info {
