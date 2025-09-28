@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Flow Testing - GaramDoodh</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .test-button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #3730A3;
+        }
+        .test-button.danger {
+            background: #dc3545;
+        }
+        .test-button.danger:hover {
+            background: #c82333;
+        }
+        .test-button.success {
+            background: #28a745;
+        }
+        .test-button.success:hover {
+            background: #218838;
+        }
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #6c757d; }
+        .step {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Login Flow Testing Tool</h1>
+        
+        <!-- Test Instructions -->
+        <div class="test-section">
+            <h2>📋 Testing Instructions</h2>
+            <div class="step">
+                <strong>Step 1:</strong> First, create a test user using the signup form below
+            </div>
+            <div class="step">
+                <strong>Step 2:</strong> Test normal login with the credentials you just created
+            </div>
+            <div class="step">
+                <strong>Step 3:</strong> Test Google OAuth (requires Google Client ID setup)
+            </div>
+            <div class="step">
+                <strong>Step 4:</strong> Check the console logs and results below for debugging info
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <!-- Signup Test -->
+            <div class="test-section">
+                <h2>📝 Test Signup</h2>
+                <p>Create a test user to verify signup works:</p>
+                
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="signupName" placeholder="Test User">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="signupEmail" placeholder="test@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="tel" id="signupPhone" placeholder="9876543210">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="signupPassword" placeholder="test123">
+                </div>
+                
+                <div class="form-group">
+                    <label>Customer Type:</label>
+                    <select id="signupCustomerType">
+                        <option value="outsider">Outsider</option>
+                        <option value="college">College</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Address:</label>
+                    <input type="text" id="signupAddress" placeholder="Test Address">
+                </div>
+                
+                <button class="test-button" onclick="testSignup()">Test Signup</button>
+            </div>
+
+            <!-- Normal Login Test -->
+            <div class="test-section">
+                <h2>🔐 Test Normal Login</h2>
+                <p>Test login with the user you just created:</p>
+                
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="loginEmail" placeholder="test@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPassword" placeholder="test123">
+                </div>
+                
+                <button class="test-button" onclick="testNormalLogin()">Test Normal Login</button>
+                <button class="test-button danger" onclick="testWrongPassword()">Test Wrong Password</button>
+            </div>
+        </div>
+
+        <!-- Google OAuth Test -->
+        <div class="test-section">
+            <h2>🔗 Test Google OAuth</h2>
+            <p>Test Google login (requires Google Client ID setup):</p>
+            
+            <button class="test-button" onclick="testGoogleOAuth()">Test Google OAuth</button>
+            <button class="test-button" onclick="checkGoogleConfig()">Check Google Config</button>
+            
+            <div id="googleConfigStatus" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- API Health Check -->
+        <div class="test-section">
+            <h2>🏥 API Health Check</h2>
+            <p>Test if all authentication APIs are working:</p>
+            
+            <button class="test-button" onclick="testAllAPIs()">Test All APIs</button>
+            <button class="test-button" onclick="testDatabaseConnection()">Test Database</button>
+        </div>
+
+        <!-- Results -->
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="test-results" class="results">
+                Test results will appear here...
+            </div>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="google-oauth-config.js"></script>
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            resultsDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = 'Test results cleared...\n';
+        }
+
+        async function testSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPassword').value;
+            const customerType = document.getElementById('signupCustomerType').value;
+            const address = document.getElementById('signupAddress').value;
+            
+            if (!name || !email || !phone || !password || !customerType || !address) {
+                addResult('Please fill in all signup fields', 'error');
+                return;
+            }
+            
+            addResult(`🔍 Testing signup for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name, email, phone, password, customerType, address
+                    })
+                });
+
+                const result = await response.json();
+                
+                addResult(`📊 Signup Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`📋 Signup Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    addResult('✅ Signup successful!', 'success');
+                    addResult(`👤 User created: ${result.data.user.name} (${result.data.user.email})`, 'success');
+                    
+                    // Auto-fill login form
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = password;
+                } else {
+                    addResult(`❌ Signup failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Signup error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testNormalLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                addResult('Please enter email and password', 'error');
+                return;
+            }
+            
+            addResult(`🔍 Testing normal login for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                addResult(`📊 Login Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`📋 Login Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    addResult('✅ Normal login successful!', 'success');
+                    addResult(`👤 User: ${result.data.user.name} (${result.data.user.email})`, 'success');
+                    addResult(`🔑 Token: ${result.data.token.substring(0, 20)}...`, 'success');
+                } else {
+                    addResult(`❌ Normal login failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWrongPassword() {
+            const email = document.getElementById('loginEmail').value;
+            const wrongPassword = 'wrongpassword123';
+            
+            if (!email) {
+                addResult('Please enter email first', 'error');
+                return;
+            }
+            
+            addResult(`🔍 Testing wrong password for: ${email}`, 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password: wrongPassword })
+                });
+
+                const result = await response.json();
+                
+                addResult(`📊 Wrong Password Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`📋 Wrong Password Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (!result.success) {
+                    addResult('✅ Wrong password correctly rejected!', 'success');
+                } else {
+                    addResult('❌ Wrong password was accepted (this is a problem!)', 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Wrong password test error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkGoogleConfig() {
+            addResult('🔍 Checking Google OAuth configuration...', 'info');
+            
+            if (typeof checkGoogleOAuthConfig === 'function') {
+                const isConfigured = checkGoogleOAuthConfig();
+                if (isConfigured) {
+                    addResult('✅ Google OAuth configuration looks good', 'success');
+                    document.getElementById('googleConfigStatus').innerHTML = '<div class="success">✅ Google OAuth is configured</div>';
+                } else {
+                    addResult('❌ Google OAuth not configured', 'error');
+                    document.getElementById('googleConfigStatus').innerHTML = '<div class="error">❌ Google OAuth not configured</div>';
+                }
+            } else {
+                addResult('❌ Google OAuth config file not loaded', 'error');
+                document.getElementById('googleConfigStatus').innerHTML = '<div class="error">❌ Google OAuth config file not loaded</div>';
+            }
+        }
+
+        async function testGoogleOAuth() {
+            addResult('🔍 Testing Google OAuth...', 'info');
+            
+            if (typeof checkGoogleOAuthConfig === 'function' && !checkGoogleOAuthConfig()) {
+                addResult('❌ Google OAuth not configured. Please set up Google Client ID first.', 'error');
+                return;
+            }
+            
+            if (typeof google !== 'undefined' && google.accounts) {
+                try {
+                    google.accounts.id.initialize({
+                        client_id: GOOGLE_OAUTH_CONFIG.clientId,
+                        callback: handleGoogleTestResponse,
+                        auto_select: false,
+                        cancel_on_tap_outside: true
+                    });
+                    
+                    addResult('✅ Google Sign-In initialized, showing prompt...', 'success');
+                    google.accounts.id.prompt();
+                } catch (error) {
+                    addResult(`❌ Google OAuth initialization error: ${error.message}`, 'error');
+                }
+            } else {
+                addResult('❌ Google Sign-In library not loaded', 'error');
+            }
+        }
+
+        async function handleGoogleTestResponse(response) {
+            try {
+                addResult('🔍 Processing Google OAuth response...', 'info');
+                
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                addResult(`📧 Google OAuth payload: ${JSON.stringify(payload, null, 2)}`, 'info');
+                
+                const backendResponse = await fetch('/.netlify/functions/auth-google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        googleId: payload.sub,
+                        email: payload.email,
+                        name: payload.name,
+                        picture: payload.picture,
+                        credential: response.credential // Send the full credential for server-side verification
+                    })
+                });
+
+                const result = await backendResponse.json();
+                
+                addResult(`📊 Google OAuth Response Status: ${backendResponse.status}`, backendResponse.ok ? 'success' : 'error');
+                addResult(`📋 Google OAuth Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    addResult('✅ Google OAuth successful!', 'success');
+                    addResult(`👤 User: ${result.data.user.name} (${result.data.user.email})`, 'success');
+                } else {
+                    addResult(`❌ Google OAuth failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`💥 Google OAuth error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllAPIs() {
+            addResult('🧪 Testing all authentication APIs...', 'info');
+            
+            // Test signup API
+            addResult('📝 Testing signup API...', 'info');
+            try {
+                const signupResponse = await fetch('/.netlify/functions/auth-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'API Test User',
+                        email: `apitest${Date.now()}@example.com`,
+                        phone: '9876543210',
+                        password: 'test123',
+                        customerType: 'outsider',
+                        address: 'Test Address'
+                    })
+                });
+                addResult(`Signup API Status: ${signupResponse.status}`, signupResponse.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult(`Signup API Error: ${error.message}`, 'error');
+            }
+            
+            // Test login API
+            addResult('🔐 Testing login API...', 'info');
+            try {
+                const loginResponse = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@example.com', password: 'test123' })
+                });
+                addResult(`Login API Status: ${loginResponse.status}`, loginResponse.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult(`Login API Error: ${error.message}`, 'error');
+            }
+            
+            // Test Google OAuth API
+            addResult('🔗 Testing Google OAuth API...', 'info');
+            try {
+                const googleResponse = await fetch('/.netlify/functions/auth-google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        googleId: 'test-google-id',
+                        email: 'test@example.com',
+                        name: 'Test User',
+                        picture: 'https://example.com/picture.jpg'
+                    })
+                });
+                addResult(`Google OAuth API Status: ${googleResponse.status}`, googleResponse.ok ? 'success' : 'error');
+            } catch (error) {
+                addResult(`Google OAuth API Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabaseConnection() {
+            addResult('🗄️ Testing database connection...', 'info');
+            try {
+                const response = await fetch('/.netlify/functions/db-test');
+                const result = await response.json();
+                addResult(`Database Test Status: ${response.status}`, response.ok ? 'success' : 'error');
+                addResult(`Database Test Response: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                addResult(`Database Test Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 Login Flow Testing Tool Loaded');
+            addResult('💡 Start by creating a test user with the signup form');
+        });
+    </script>
+</body>
+</html>

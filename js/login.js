@@ -158,6 +158,7 @@ class LoginManager {
                 this.showNotification(response.message || 'Login failed', 'error');
             }
         } catch (error) {
+            console.error('Login error:', error);
             this.showNotification('An error occurred. Please try again.', 'error');
         } finally {
             this.setButtonLoading(this.form.querySelector('button[type="submit"]'), false);

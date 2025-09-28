@@ -246,11 +246,12 @@
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="google-oauth-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/auth-guard.js"></script>
     <script>
         // Form submission handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
@@ -269,19 +270,56 @@
                 return;
             }
             
-            // Simulate login process
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            setButtonLoading(submitBtn, true);
             showNotification('Logging in...', 'info');
             
-            // Here you would typically make an API call to your backend
-            setTimeout(() => {
-                // Simulate successful login
-                showNotification('Login successful! Redirecting...', 'success');
+            try {
+                console.log('🔍 Attempting login for:', email);
                 
-                // Redirect to dashboard or home page after successful login
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-            }, 2000);
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                console.log('📊 Login response status:', response.status);
+                const data = await response.json();
+                console.log('📋 Login response data:', data);
+
+                if (response.ok && data.success) {
+                    showNotification('Login successful! Redirecting...', 'success');
+                    
+                    // Store user data
+                    localStorage.setItem('garamdoodh_user', JSON.stringify(data.data.user));
+                    localStorage.setItem('garamdoodh_token', data.data.token);
+                    
+                    // Check for return URL
+                    const returnUrl = localStorage.getItem('garamdoodh_return_url');
+                    const redirectUrl = returnUrl || 'index.html';
+                    
+                    // Clear return URL
+                    if (returnUrl) {
+                        localStorage.removeItem('garamdoodh_return_url');
+                    }
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1500);
+                } else {
+                    console.error('❌ Login failed:', data.message);
+                    showNotification(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('💥 Login error:', error);
+                showNotification('Network error. Please try again.', 'error');
+            } finally {
+                setButtonLoading(submitBtn, false);
+            }
         });
 
         // Google Login handling
@@ -292,22 +330,26 @@
 
         // Initialize Google Sign-In
         function initializeGoogleSignIn() {
-            if (typeof google !== 'undefined') {
+            console.log('🔍 Initializing Google Sign-In...');
+            
+            // Check if Google OAuth is configured
+            if (!checkGoogleOAuthConfig()) {
+                showNotification('Google OAuth not configured. Please set up Google Client ID.', 'error');
+                return;
+            }
+            
+            if (typeof google !== 'undefined' && google.accounts) {
                 google.accounts.id.initialize({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual client ID
+                    client_id: GOOGLE_OAUTH_CONFIG.clientId,
                     callback: handleGoogleResponse,
                     auto_select: false,
                     cancel_on_tap_outside: true
                 });
                 
-                // Show error if client ID is not configured
-                if (google.accounts.id.getClientId() === 'YOUR_GOOGLE_CLIENT_ID') {
-                    showNotification('Google OAuth not configured. Please set up Google Client ID.', 'error');
-                    return;
-                }
-                
+                console.log('✅ Google Sign-In initialized, showing prompt...');
                 google.accounts.id.prompt();
             } else {
+                console.error('❌ Google Sign-In library not loaded');
                 showNotification('Google Sign-In not available. Please try again.', 'error');
             }
         }
@@ -315,12 +357,20 @@
         // Handle Google OAuth response
         async function handleGoogleResponse(response) {
             try {
+                console.log('🔍 Processing Google OAuth response...');
                 showNotification('Processing Google login...', 'info');
                 
                 // Decode the JWT token
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                console.log('📧 Google OAuth payload:', {
+                    sub: payload.sub,
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture
+                });
                 
                 // Send to backend
+                console.log('📤 Sending Google OAuth data to backend...');
                 const backendResponse = await fetch('/.netlify/functions/auth-google', {
                     method: 'POST',
                     headers: {
@@ -334,9 +384,12 @@
                     })
                 });
 
+                console.log('📊 Backend response status:', backendResponse.status);
                 const result = await backendResponse.json();
+                console.log('📋 Backend response data:', result);
 
                 if (result.success) {
+                    console.log('✅ Google login successful!');
                     showNotification('Google login successful!', 'success');
                     
                     // Store user data
@@ -357,10 +410,11 @@
                         window.location.href = redirectUrl;
                     }, 1500);
                 } else {
+                    console.error('❌ Google login failed:', result.message);
                     showNotification(result.message || 'Google login failed', 'error');
                 }
             } catch (error) {
-                console.error('Google login error:', error);
+                console.error('💥 Google login error:', error);
                 showNotification('Google login failed. Please try again.', 'error');
             }
         }
