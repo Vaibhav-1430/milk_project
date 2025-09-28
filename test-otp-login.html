@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>OTP Login Test Page</h1>
+    <p>This page allows you to test the OTP login functionality without affecting the main application.</p>
+
+    <div class="test-section">
+        <h2>1. Generate OTP</h2>
+        <p>Enter an email address to send the OTP to:</p>
+        <input type="email" id="testEmail" placeholder="Enter email address">
+        <button id="generateOtpBtn">Generate OTP</button>
+        <div id="generateOtpResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Verify OTP</h2>
+        <p>Enter the OTP you received:</p>
+        <input type="text" id="testOtp" placeholder="Enter 6-digit OTP" maxlength="6">
+        <button id="verifyOtpBtn">Verify OTP</button>
+        <div id="verifyOtpResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Information</h2>
+        <pre id="debugInfo"></pre>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateOtpBtn = document.getElementById('generateOtpBtn');
+            const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+            const generateOtpResult = document.getElementById('generateOtpResult');
+            const verifyOtpResult = document.getElementById('verifyOtpResult');
+            const debugInfo = document.getElementById('debugInfo');
+
+            // Generate OTP
+            generateOtpBtn.addEventListener('click', async function() {
+                const email = document.getElementById('testEmail').value;
+                
+                if (!email) {
+                    showResult(generateOtpResult, 'Please enter an email address', 'error');
+                    return;
+                }
+
+                try {
+                    generateOtpBtn.disabled = true;
+                    generateOtpBtn.textContent = 'Sending...';
+                    
+                    const response = await fetch('/.netlify/functions/auth-otp-generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showResult(generateOtpResult, 'OTP sent successfully! Check your email.', 'success');
+                        updateDebugInfo('Generate OTP Response', data);
+                    } else {
+                        showResult(generateOtpResult, `Error: ${data.message || 'Failed to send OTP'}`, 'error');
+                        updateDebugInfo('Generate OTP Error', data);
+                    }
+                } catch (error) {
+                    console.error('Error generating OTP:', error);
+                    showResult(generateOtpResult, 'An error occurred. Check console for details.', 'error');
+                    updateDebugInfo('Generate OTP Exception', { error: error.toString() });
+                } finally {
+                    generateOtpBtn.disabled = false;
+                    generateOtpBtn.textContent = 'Generate OTP';
+                }
+            });
+
+            // Verify OTP
+            verifyOtpBtn.addEventListener('click', async function() {
+                const email = document.getElementById('testEmail').value;
+                const otp = document.getElementById('testOtp').value;
+                
+                if (!email) {
+                    showResult(verifyOtpResult, 'Please enter an email address', 'error');
+                    return;
+                }
+                
+                if (!otp || otp.length !== 6) {
+                    showResult(verifyOtpResult, 'Please enter a valid 6-digit OTP', 'error');
+                    return;
+                }
+
+                try {
+                    verifyOtpBtn.disabled = true;
+                    verifyOtpBtn.textContent = 'Verifying...';
+                    
+                    const response = await fetch('/.netlify/functions/auth-otp-verify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, otp })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showResult(verifyOtpResult, 'OTP verified successfully! User authenticated.', 'success');
+                        updateDebugInfo('Verify OTP Response', data);
+                    } else {
+                        showResult(verifyOtpResult, `Error: ${data.message || 'Invalid or expired OTP'}`, 'error');
+                        updateDebugInfo('Verify OTP Error', data);
+                    }
+                } catch (error) {
+                    console.error('Error verifying OTP:', error);
+                    showResult(verifyOtpResult, 'An error occurred. Check console for details.', 'error');
+                    updateDebugInfo('Verify OTP Exception', { error: error.toString() });
+                } finally {
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.textContent = 'Verify OTP';
+                }
+            });
+
+            // Helper functions
+            function showResult(element, message, type) {
+                element.innerHTML = `<p class="${type}">${message}</p>`;
+            }
+
+            function updateDebugInfo(title, data) {
+                const currentContent = debugInfo.textContent;
+                const timestamp = new Date().toLocaleTimeString();
+                const newContent = `[${timestamp}] ${title}:\n${JSON.stringify(data, null, 2)}\n\n${currentContent}`;
+                debugInfo.textContent = newContent;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -356,48 +356,11 @@
         }
 
         async function testGoogleOAuth() {
-            addResult('🔍 Testing Google OAuth...', 'info');
-            
-            if (typeof checkGoogleOAuthConfig === 'function' && !checkGoogleOAuthConfig()) {
-                addResult('❌ Google OAuth not configured. Please set up Google Client ID first.', 'error');
-                return;
-            }
-            
-            if (typeof google !== 'undefined' && google.accounts) {
-                try {
-                    google.accounts.id.initialize({
-                        client_id: GOOGLE_OAUTH_CONFIG.clientId,
-                        callback: handleGoogleTestResponse,
-                        auto_select: false,
-                        cancel_on_tap_outside: true
-                    });
-                    
-                    addResult('✅ Google Sign-In initialized, showing prompt...', 'success');
-                    google.accounts.id.prompt();
-                } catch (error) {
-                    addResult(`❌ Google OAuth initialization error: ${error.message}`, 'error');
-                }
-            } else {
-                addResult('❌ Google Sign-In library not loaded', 'error');
-            }
+            addResult('🔍 Google OAuth functionality has been removed', 'info');
         }
 
         async function handleGoogleTestResponse(response) {
-            try {
-                addResult('🔍 Processing Google OAuth response...', 'info');
-                
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                addResult(`📧 Google OAuth payload: ${JSON.stringify(payload, null, 2)}`, 'info');
-                
-                const backendResponse = await fetch('/.netlify/functions/auth-google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        googleId: payload.sub,
-                        email: payload.email,
-                        name: payload.name,
+            // Google OAuth functionality has been removed
                         picture: payload.picture,
                         credential: response.credential // Send the full credential for server-side verification
                     })
