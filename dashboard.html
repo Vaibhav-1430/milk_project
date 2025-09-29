@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center">
+                <img src="images/garam-doodh-logo.png" alt="GaramDoodh Logo" class="h-10">
+                <span class="ml-2 text-xl font-semibold text-indigo-600">GaramDoodh</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="products.html" class="text-gray-600 hover:text-indigo-600">Products</a>
+                <a href="cart.html" class="text-gray-600 hover:text-indigo-600">Cart</a>
+                <div id="userNav" class="hidden">
+                    <a href="dashboard.html" class="text-indigo-600 font-medium">Dashboard</a>
+                    <button id="logoutBtn" class="ml-4 text-gray-600 hover:text-red-600">Logout</button>
+                </div>
+                <div id="guestNav" class="hidden">
+                    <a href="login.html" class="text-gray-600 hover:text-indigo-600">Login</a>
+                    <a href="signup.html" class="ml-4 text-gray-600 hover:text-indigo-600">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Welcome to Your Dashboard</h1>
+            <p class="text-gray-600 mb-4">Manage your account and orders from here.</p>
+            
+            <div id="userInfo" class="mb-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">Your Information</h2>
+                <div class="bg-gray-50 p-4 rounded">
+                    <p class="mb-2"><span class="font-medium">Name:</span> <span id="userName">Loading...</span></p>
+                    <p class="mb-2"><span class="font-medium">Email:</span> <span id="userEmail">Loading...</span></p>
+                    <p><span class="font-medium">Member since:</span> <span id="userSince">Loading...</span></p>
+                </div>
+            </div>
+            
+            <div id="recentOrders">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">Recent Orders</h2>
+                <div id="ordersContainer" class="space-y-4">
+                    <p id="noOrdersMessage" class="text-gray-500 italic">Loading your orders...</p>
+                    <!-- Orders will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-semibold mb-2">GaramDoodh</h3>
+                    <p class="text-gray-400">Fresh dairy products delivered to your doorstep</p>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold mb-2">Quick Links</h4>
+                    <ul class="text-gray-400">
+                        <li><a href="index.html" class="hover:text-white">Home</a></li>
+                        <li><a href="products.html" class="hover:text-white">Products</a></li>
+                        <li><a href="#" class="hover:text-white">About Us</a></li>
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-6 border-t border-gray-700 pt-4 text-center text-gray-400">
+                <p>&copy; 2023 GaramDoodh. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize auth manager
+            const authManager = new AuthManager();
+            
+            // Check if user is logged in
+            if (!authManager.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Update navigation
+            authManager.updateNavigation();
+            
+            // Get user data
+            const userData = authManager.getUserData();
+            
+            // Display user info
+            document.getElementById('userName').textContent = userData.name || 'N/A';
+            document.getElementById('userEmail').textContent = userData.email || 'N/A';
+            
+            // Format and display user registration date
+            const createdAt = userData.createdAt ? new Date(userData.createdAt) : null;
+            document.getElementById('userSince').textContent = createdAt 
+                ? createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                : 'N/A';
+            
+            // Handle logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                authManager.logout();
+                window.location.href = 'index.html';
+            });
+            
+            // TODO: Fetch and display recent orders
+            // This would typically involve an API call to get the user's orders
+            document.getElementById('noOrdersMessage').textContent = 'You have no recent orders.';
+        });
+    </script>
+</body>
+</html>
