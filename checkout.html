@@ -122,7 +122,7 @@
       try {
         if (paymentMethod === "cod") {
           // Cash on Delivery → directly call backend
-          const res = await fetch("https://garamdoodh.netlify.app/api/orders-guest", {
+          const res = await fetch("/.netlify/functions/orders-guest", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(orderData)
