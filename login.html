@@ -165,14 +165,12 @@
             <div class="mb-6">
                 <div class="flex border-b border-border">
                     <button 
-                        type="button"
                         id="passwordTabBtn" 
                         class="flex-1 py-2 font-medium text-center border-b-2 border-primary text-primary"
                     >
                         <i class="fas fa-lock mr-2"></i>Password
                     </button>
                     <button 
-                        type="button"
                         id="otpTabBtn" 
                         class="flex-1 py-2 font-medium text-center border-b-2 border-transparent text-muted hover:text-gray-700"
                     >
@@ -322,10 +320,34 @@
 
     <script src="js/auth.js"></script>
     <script src="js/auth-guard.js"></script>
-    <script src="js/otp-login.js"></script>
     <script>
+        // Tab switching functionality
+        document.getElementById('passwordTabBtn').addEventListener('click', function() {
+            // Update tab buttons
+            this.classList.add('border-primary', 'text-primary');
+            this.classList.remove('border-transparent', 'text-muted');
+            document.getElementById('otpTabBtn').classList.remove('border-primary', 'text-primary');
+            document.getElementById('otpTabBtn').classList.add('border-transparent', 'text-muted');
+            
+            // Show password form, hide OTP form
+            document.getElementById('passwordLoginForm').classList.remove('hidden');
+            document.getElementById('otpLoginForm').classList.add('hidden');
+        });
+        
+        document.getElementById('otpTabBtn').addEventListener('click', function() {
+            // Update tab buttons
+            this.classList.add('border-primary', 'text-primary');
+            this.classList.remove('border-transparent', 'text-muted');
+            document.getElementById('passwordTabBtn').classList.remove('border-primary', 'text-primary');
+            document.getElementById('passwordTabBtn').classList.add('border-transparent', 'text-muted');
+            
+            // Show OTP form, hide password form
+            document.getElementById('otpLoginForm').classList.remove('hidden');
+            document.getElementById('passwordLoginForm').classList.add('hidden');
+        });
+        
         // Form submission handling
-        document.getElementById('passwordLoginForm').addEventListener('submit', async function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;

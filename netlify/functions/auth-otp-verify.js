@@ -32,19 +32,8 @@ exports.handler = async (event) => {
         // Check if OTP exists for this email
         const otpData = otpStore.get(email);
         
-        console.log('🔍 OTP data from store:', email, otpData);
-        console.log('🔍 Current OTP store contents:', [...otpStore.entries()]);
-        
-        // If no OTP in store but user has received one via email, use the provided OTP
-        // This is a fallback for when the serverless function loses state
         if (!otpData) {
-            console.log('⚠️ No OTP found in store, but proceeding with verification anyway');
-            // Create a temporary OTP data entry with the provided OTP
-            // This allows verification to proceed even if the store lost the OTP
-            otpStore.set(email, {
-                otp: otp,
-                expiry: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes from now
-            });
+            return json({ success: false, message: 'No OTP found for this email' }, 400);
         }
         
         // Check if OTP is expired
@@ -61,44 +50,15 @@ exports.handler = async (event) => {
         }
         
         // OTP is valid, find user
-        let user;
-        let isMockUser = false;
+        const user = await User.findOne({ email });
         
-        try {
-            user = await User.findOne({ email });
-        } catch (dbError) {
-            console.warn('⚠️ Database error when finding user:', dbError.message);
-        }
-        
-        // For testing purposes, create a mock user if not found
         if (!user) {
-            console.log('👤 Creating mock user for testing:', email);
-            user = {
-                _id: 'mock-user-' + Date.now(),
-                email: email,
-                name: 'Test User',
-                role: 'user',
-                createdAt: new Date(),
-                lastLogin: new Date(),
-                toObject: function() {
-                    return {
-                        _id: this._id,
-                        email: this.email,
-                        name: this.name,
-                        role: this.role,
-                        createdAt: this.createdAt,
-                        lastLogin: this.lastLogin
-                    };
-                }
-            };
-            isMockUser = true;
+            return json({ success: false, message: 'User not found' }, 404);
         }
         
         // Update last login
-        if (!isMockUser) {
-            user.lastLogin = new Date();
-            await user.save();
-        }
+        user.lastLogin = new Date();
+        await user.save();
         
         // Generate JWT token
         const token = generateToken(user._id);
