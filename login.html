@@ -346,6 +346,173 @@
             document.getElementById('passwordLoginForm').classList.add('hidden');
         });
         
+        // Send OTP button handling
+        document.getElementById('sendOtpBtn').addEventListener('click', async function() {
+            const email = document.getElementById('otpEmail').value;
+            
+            // Basic validation
+            if (!email) {
+                showNotification('Please enter your email address', 'error');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Show loading state
+            setButtonLoading(this, true);
+            showNotification('Sending OTP...', 'info');
+            
+            try {
+                console.log('🔍 Generating OTP for:', email);
+                
+                const response = await fetch('/.netlify/functions/auth-otp-generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                console.log('📊 OTP generation response status:', response.status);
+                const data = await response.json();
+                console.log('📋 OTP generation response data:', data);
+
+                if (response.ok && data.success) {
+                    showNotification('OTP sent successfully! Check your email.', 'success');
+                    
+                    // Show OTP input field
+                    document.getElementById('otpInputContainer').classList.remove('hidden');
+                    
+                    // Start OTP timer
+                    startOtpTimer();
+                } else {
+                    console.error('❌ OTP generation failed:', data.message);
+                    showNotification(data.message || 'Failed to send OTP', 'error');
+                }
+            } catch (error) {
+                console.error('💥 OTP generation error:', error);
+                showNotification('Network error. Please try again.', 'error');
+            } finally {
+                setButtonLoading(this, false);
+            }
+        });
+        
+        // OTP verification form submission
+        document.getElementById('otpLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('otpEmail').value;
+            const otp = document.getElementById('otpCode').value;
+            
+            // Basic validation
+            if (!email || !otp) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // OTP validation
+            if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+                showNotification('Please enter a valid 6-digit OTP', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const verifyBtn = document.getElementById('verifyOtpBtn');
+            setButtonLoading(verifyBtn, true);
+            showNotification('Verifying OTP...', 'info');
+            
+            try {
+                console.log('🔍 Verifying OTP for:', email);
+                
+                const response = await fetch('/.netlify/functions/auth-otp-verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, otp })
+                });
+
+                console.log('📊 OTP verification response status:', response.status);
+                const data = await response.json();
+                console.log('📋 OTP verification response data:', data);
+
+                if (response.ok && data.success) {
+                    showNotification('OTP verified successfully! Redirecting...', 'success');
+                    
+                    // Store user data
+                    localStorage.setItem('garamdoodh_user', JSON.stringify(data.data.user));
+                    localStorage.setItem('garamdoodh_token', data.data.token);
+                    
+                    // Check for return URL
+                    const returnUrl = localStorage.getItem('garamdoodh_return_url');
+                    const redirectUrl = returnUrl || 'index.html';
+                    
+                    // Clear return URL
+                    if (returnUrl) {
+                        localStorage.removeItem('garamdoodh_return_url');
+                    }
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1500);
+                } else {
+                    console.error('❌ OTP verification failed:', data.message);
+                    showNotification(data.message || 'Invalid or expired OTP', 'error');
+                }
+            } catch (error) {
+                console.error('💥 OTP verification error:', error);
+                showNotification('Network error. Please try again.', 'error');
+            } finally {
+                setButtonLoading(verifyBtn, false);
+            }
+        });
+        
+        // OTP timer functionality
+        let otpTimerInterval;
+        function startOtpTimer() {
+            // Clear any existing timer
+            if (otpTimerInterval) {
+                clearInterval(otpTimerInterval);
+            }
+            
+            // Set initial time (5 minutes)
+            let timeLeft = 5 * 60;
+            const timerElement = document.getElementById('otpTimer');
+            const resendButton = document.getElementById('resendOtpBtn');
+            
+            // Disable resend button initially
+            resendButton.disabled = true;
+            
+            // Update timer every second
+            otpTimerInterval = setInterval(() => {
+                timeLeft--;
+                
+                // Format time as MM:SS
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `OTP expires in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Enable resend button when timer reaches 0
+                if (timeLeft <= 0) {
+                    clearInterval(otpTimerInterval);
+                    timerElement.textContent = 'OTP expired';
+                    resendButton.disabled = false;
+                }
+            }, 1000);
+        }
+        
+        // Resend OTP button
+        document.getElementById('resendOtpBtn').addEventListener('click', function() {
+            // Trigger the send OTP button click
+            document.getElementById('sendOtpBtn').click();
+        });
+        
         // Form submission handling
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
