@@ -117,15 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1000);
+                
+                // Return early to prevent the button from being re-enabled
+                // This prevents multiple clicks during redirection
+                return;
             } else {
                 showNotification(data.message || 'Invalid or expired OTP', 'error');
             }
         } catch (error) {
             console.error('Error verifying OTP:', error);
             showNotification('An error occurred. Please try again.', 'error');
-        } finally {
-            verifyOtpBtn.disabled = false;
-            verifyOtpBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify & Login';
+        }
+        
+        // Only reset button if there was an error
+        verifyOtpBtn.disabled = false;
+        verifyOtpBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify & Login';
         }
     });
     
