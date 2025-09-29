@@ -15,25 +15,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     
     // Tab switching functionality
-    passwordTabBtn.addEventListener('click', () => {
-        passwordTabBtn.classList.add('border-primary', 'text-primary');
-        passwordTabBtn.classList.remove('border-transparent', 'text-muted');
-        otpTabBtn.classList.remove('border-primary', 'text-primary');
-        otpTabBtn.classList.add('border-transparent', 'text-muted');
+    if (passwordTabBtn && otpTabBtn) {
+        passwordTabBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            passwordTabBtn.classList.add('border-primary', 'text-primary');
+            passwordTabBtn.classList.remove('border-transparent', 'text-muted');
+            otpTabBtn.classList.remove('border-primary', 'text-primary');
+            otpTabBtn.classList.add('border-transparent', 'text-muted');
+            
+            passwordLoginForm.classList.remove('hidden');
+            otpLoginForm.classList.add('hidden');
+        });
         
-        passwordLoginForm.classList.remove('hidden');
-        otpLoginForm.classList.add('hidden');
-    });
-    
-    otpTabBtn.addEventListener('click', () => {
-        otpTabBtn.classList.add('border-primary', 'text-primary');
-        otpTabBtn.classList.remove('border-transparent', 'text-muted');
-        passwordTabBtn.classList.remove('border-primary', 'text-primary');
-        passwordTabBtn.classList.add('border-transparent', 'text-muted');
-        
-        otpLoginForm.classList.remove('hidden');
-        passwordLoginForm.classList.add('hidden');
-    });
+        otpTabBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            otpTabBtn.classList.add('border-primary', 'text-primary');
+            otpTabBtn.classList.remove('border-transparent', 'text-muted');
+            passwordTabBtn.classList.remove('border-primary', 'text-primary');
+            passwordTabBtn.classList.add('border-transparent', 'text-muted');
+            
+            otpLoginForm.classList.remove('hidden');
+            passwordLoginForm.classList.add('hidden');
+        });
+    } else {
+        console.error('Tab buttons not found in the DOM');
+    }
     
     // Send OTP functionality
     sendOtpBtn.addEventListener('click', async () => {
