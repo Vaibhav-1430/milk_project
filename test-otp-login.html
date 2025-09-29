@@ -78,6 +78,17 @@
         <h2>Debug Information</h2>
         <pre id="debugInfo"></pre>
     </div>
+    
+    <div class="test-section">
+        <h2>Test Mode Information</h2>
+        <p>This page is running in test mode with the following features:</p>
+        <ul>
+            <li>✅ Mock email transport (OTPs are displayed in debug info)</li>
+            <li>✅ Mock user creation (no database required)</li>
+            <li>✅ 5-minute OTP expiration</li>
+        </ul>
+        <p><strong>Note:</strong> Enter any email address for testing. The system will create a mock user if the email doesn't exist in the database.</p>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
