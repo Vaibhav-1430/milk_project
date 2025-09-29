@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Redirect to dashboard
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = 'dashboard.html';
                 }, 1000);
             } else {
                 showNotification(data.message || 'Invalid or expired OTP', 'error');
