@@ -98,8 +98,37 @@
   <script>
     document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
+      
+     
+      
+      // Validate required fields
+      const name = e.target.name.value.trim();
+      const phone = e.target.phone.value.trim();
+      const email = e.target.email.value.trim();
+      const hostel = e.target.hostel.value.trim();
+      const address = e.target.address.value.trim();
       const paymentMethod = e.target.paymentMethod.value;
+      
+      // Check if required fields are filled
+      if (!name || !phone || !email || !address) {
+        resultDiv.innerHTML = "❌ Please fill in all required fields";
+        resultDiv.className = "error";
+        return;
+      }
+      
+      // Validate phone number format (10 digits)
+      if (!/^\d{10}$/.test(phone)) {
+        resultDiv.innerHTML = "❌ Please enter a valid 10-digit phone number";
+        resultDiv.className = "error";
+        return;
+      }
+      
+      // Validate email format
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        resultDiv.innerHTML = "❌ Please enter a valid email address";
+        resultDiv.className = "error";
+        return;
+      }
 
       // Sample order, replace with cart later
       const orderData = {
@@ -107,12 +136,12 @@
           { name: "Milk", price: 50, quantity: 2 }
         ],
         customerType: "college",
-        hostel: e.target.hostel.value,
-        address: e.target.address.value,
+        hostel: hostel,
+        address: address,
         contactInfo: {
-          name: e.target.name.value,
-          phone: e.target.phone.value,
-          email: e.target.email.value
+          name: name,
+          phone: phone,
+          email: email
         },
         payment: { method: paymentMethod }
       };

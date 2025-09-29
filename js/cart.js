@@ -499,14 +499,49 @@ function setupCheckout() {
                 try { await window.api.warmUp(); } catch (_) {}
             }
 
-            const contactInfo = {
-                name: checkoutForm.name.value,
-                phone: checkoutForm.phone.value,
-                email: checkoutForm.email.value
-            };
-            const address = checkoutForm.address.value;
+            // Validate required fields
+            const name = checkoutForm.name.value.trim();
+            const phone = checkoutForm.phone.value.trim();
+            const email = checkoutForm.email.value.trim();
+            const address = checkoutForm.address.value.trim();
             const paymentMethod = checkoutForm.paymentMethod.value;
-            const hostel = checkoutForm.hostel.value;
+            const hostel = checkoutForm.hostel.value.trim();
+            
+            // Check if required fields are filled
+            if (!name || !phone || !email || !address) {
+                alert("Please fill in all required fields");
+                if (submitBtn) { 
+                    submitBtn.disabled = false; 
+                    submitBtn.textContent = 'Place Order'; 
+                }
+                return;
+            }
+            
+            // Validate phone number format (10 digits)
+            if (!/^\d{10}$/.test(phone)) {
+                alert("Please enter a valid 10-digit phone number");
+                if (submitBtn) { 
+                    submitBtn.disabled = false; 
+                    submitBtn.textContent = 'Place Order'; 
+                }
+                return;
+            }
+            
+            // Validate email format
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert("Please enter a valid email address");
+                if (submitBtn) { 
+                    submitBtn.disabled = false; 
+                    submitBtn.textContent = 'Place Order'; 
+                }
+                return;
+            }
+            
+            const contactInfo = {
+                name: name,
+                phone: phone,
+                email: email
+            };
 
             let itemsPayload = cart.map(item => ({
                 name: `${item.name} (${item.productQuantity})`,
