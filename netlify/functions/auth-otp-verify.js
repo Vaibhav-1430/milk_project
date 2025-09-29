@@ -3,7 +3,6 @@ const { connectToDatabase } = require('../../db');
 const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 
-// OTP storage (in-memory for simplicity, consider using a database in production)
 // Import the shared OTP store from a separate module for persistence between functions
 const { otpStore } = require('./_otp-store');
 
@@ -30,7 +29,7 @@ exports.handler = async (event) => {
         }
         
         // Check if OTP exists for this email
-        const otpData = otpStore.get(email);
+        const otpData = await otpStore.get(email);
         
         if (!otpData) {
             return json({ success: false, message: 'No OTP found for this email' }, 400);
@@ -40,7 +39,7 @@ exports.handler = async (event) => {
         const now = new Date();
         if (now > otpData.expiry) {
             // Remove expired OTP
-            otpStore.delete(email);
+            await otpStore.delete(email);
             return json({ success: false, message: 'OTP has expired' }, 400);
         }
         
@@ -64,7 +63,7 @@ exports.handler = async (event) => {
         const token = generateToken(user._id);
         
         // Remove OTP from store after successful verification
-        otpStore.delete(email);
+        await otpStore.delete(email);
         
         // Remove password from response
         const userResponse = user.toObject();

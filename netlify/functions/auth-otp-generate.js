@@ -99,7 +99,7 @@ exports.handler = async (event) => {
         const expiryTime = new Date();
         expiryTime.setMinutes(expiryTime.getMinutes() + 5);
         
-        otpStore.set(email, {
+        await otpStore.set(email, {
             otp,
             expiry: expiryTime
         });
