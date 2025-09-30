@@ -558,15 +558,16 @@ function setupCheckout() {
             try {
                 if (paymentMethod === 'cod') {
                     // ✅ Cash on Delivery - directly create order
-                    const response = await api.createGuestOrder({
-                        items: itemsPayload,
-                        customerType,
-                        hostel: hostel || undefined,
-                        address,
-                        contactInfo,
-                        payment: { method: paymentMethod },
-                        coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
-                    });
+                    try {
+                        const response = await api.createGuestOrder({
+                            items: itemsPayload,
+                            customerType,
+                            hostel: hostel || undefined,
+                            address,
+                            contactInfo,
+                            payment: { method: paymentMethod },
+                            coupon: appliedCoupon ? { code: appliedCoupon.code, discount: appliedCoupon.value, type: appliedCoupon.type } : undefined
+                        });
 
                     if (response.success) {
                         triggerOrderPlacedAnimation();
@@ -576,6 +577,14 @@ function setupCheckout() {
                         saveCart();
                     } else {
                         alert('Could not place order: ' + (response.message || 'Unknown error'));
+                    }
+                    } catch (error) {
+                        console.error('Order creation error:', error);
+                        alert('Failed to place order. Please try again later.');
+                        if (submitBtn) { 
+                            submitBtn.disabled = false; 
+                            submitBtn.textContent = 'Place Order'; 
+                        }
                     }
                 } else {
                     // ✅ Online Payment - Razorpay flow
