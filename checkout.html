@@ -99,7 +99,7 @@
     document.getElementById("checkoutForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       
-     
+      const resultDiv = document.getElementById("orderResult");
       
       // Validate required fields
       const name = e.target.name.value.trim();
@@ -146,7 +146,6 @@
         payment: { method: paymentMethod }
       };
 
-      const resultDiv = document.getElementById("orderResult");
 
       try {
         if (paymentMethod === "cod") {
