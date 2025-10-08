@@ -151,7 +151,23 @@ After these fixes:
 - ✅ Detailed logging should help debug any remaining issues
 - ✅ User sessions should be properly stored and managed
 
-## 🔧 Configuration Required
+## �️ Additional Fix: Place Order button not working
+
+### Problem
+- The Place Order / Proceed to Checkout buttons were being intercepted by the authentication guard which called e.preventDefault() for order-related actions even when the user was already authenticated. This prevented the form submit handler in `js/cart.js` from running.
+
+### Fix Applied
+- Updated `js/auth-guard.js` to only call `e.preventDefault()` when the user is not authenticated. If the user is authenticated, the native action (form submit / button click) is allowed to proceed so the existing `checkoutForm` submit handler runs.
+
+### How to test
+1. Open `cart.html` and add items to cart.
+2. Click "Proceed to Checkout" and fill in required fields.
+3. Click "Place Order" — the order should be submitted and confirmation shown.
+
+Files modified:
+- `js/auth-guard.js` — adjusted order protection logic
+
+## �🔧 Configuration Required
 
 ### For Google OAuth:
 1. Get Google Client ID from Google Cloud Console

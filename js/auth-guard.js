@@ -344,18 +344,14 @@ class AuthGuard {
             );
 
             if (isOrderAction) {
-                e.preventDefault();
-                
+                // If user is not authenticated, block the action and show login modal
                 if (!this.requireAuth('place an order', window.location.href)) {
+                    e.preventDefault();
                     return;
                 }
-                
-                // If authenticated, proceed with original action
-                if (href && href !== '#') {
-                    window.location.href = href;
-                } else if (target.onclick) {
-                    target.onclick();
-                }
+
+                // If authenticated, allow the native action to proceed (form submit / link navigation / button click).
+                // Do not call e.preventDefault() here so event listeners (e.g. form submit) run normally.
             }
         });
     }
