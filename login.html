@@ -1,763 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - GaramDoodh</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4F46E5',
-                        'primary-dark': '#3730A3',
-                        'primary-light': '#6366F1',
-                        secondary: '#ff6b35',
-                        'secondary-light': '#ff8f6a',
-                        accent: '#efefd0',
-                        dark: '#004e89',
-                        light: '#f8f9fa',
-                        surface: '#ffffff',
-                        'surface-muted': '#f6f7fb',
-                        border: '#e5e7eb',
-                        muted: '#6b7280',
-                        success: '#28a745',
-                        danger: '#dc3545'
-                    },
-                    fontFamily: {
-                        'inter': ['Inter', 'system-ui', 'sans-serif'],
-                        'poppins': ['Poppins', 'system-ui', 'sans-serif']
-                    },
-                    boxShadow: {
-                        'soft': '0 10px 24px rgba(0,0,0,0.08)',
-                        'soft-hover': '0 16px 36px rgba(0,0,0,0.12)',
-                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        .login-container {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-        }
-        
-        .login-card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .input-group {
-            position: relative;
-        }
-        
-        .input-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            transition: color 0.2s ease;
-        }
-        
-        .input-field {
-            padding-left: 40px;
-            transition: all 0.2s ease;
-        }
-        
-        .input-field:focus + .input-icon {
-            color: #4F46E5;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #4F46E5, #6366F1);
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #3730A3, #4F46E5);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
-        }
-        
-        .btn-google {
-            transition: all 0.2s ease;
-        }
-        
-        .btn-google:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-        
-        .divider {
-            position: relative;
-            text-align: center;
-        }
-        
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e5e7eb;
-        }
-        
-        .divider span {
-            background: #ffffff;
-            padding: 0 16px;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .slide-up {
-            animation: slideUp 0.4s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - GaramDoodh</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%);
+      min-height: 100vh;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3730a3, #4f46e5);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+    }
+    .notification {
+      animation: fadeInOut 3s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(100%); }
+      10%, 90% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(100%); }
+    }
+  </style>
 </head>
-<body class="font-inter">
-    <div class="login-container flex items-center justify-center p-4">
-        <div class="login-card w-full max-w-md rounded-2xl shadow-soft p-8 fade-in">
-            <!-- Logo Section -->
-            <div class="text-center mb-8 slide-up">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-light rounded-full mb-4">
-                    <img src="images/garam-doodh-logo.png" alt="GaramDoodh Logo" class="w-10 h-10 object-contain">
-                </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-                <p class="text-muted text-sm">Sign in to your GaramDoodh account</p>
-            </div>
 
-            <!-- Login Tabs -->
-            <div class="mb-6">
-                <div class="flex border-b border-border">
-                    <button 
-                        id="passwordTabBtn" 
-                        class="flex-1 py-2 font-medium text-center border-b-2 border-primary text-primary"
-                    >
-                        <i class="fas fa-lock mr-2"></i>Password
-                    </button>
-                    <button 
-                        id="otpTabBtn" 
-                        class="flex-1 py-2 font-medium text-center border-b-2 border-transparent text-muted hover:text-gray-700"
-                    >
-                        <i class="fas fa-key mr-2"></i>OTP Login
-                    </button>
-                </div>
-            </div>
-
-            <!-- Password Login Form -->
-            <form id="passwordLoginForm" class="space-y-6 slide-up">
-                <!-- Email Field -->
-                <div class="input-group">
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        placeholder="Enter your email"
-                        class="input-field w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                        required
-                    >
-                    <i class="fas fa-envelope input-icon"></i>
-                </div>
-
-                <!-- Password Field -->
-                <div class="input-group">
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Enter your password"
-                        class="input-field w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                        required
-                    >
-                    <i class="fas fa-lock input-icon"></i>
-                </div>
-
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between text-sm">
-                    <label class="flex items-center">
-                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary">
-                        <span class="ml-2 text-muted">Remember me</span>
-                    </label>
-                    <a href="#" class="text-primary hover:text-primary-dark transition-colors duration-200">Forgot password?</a>
-                </div>
-
-                <!-- Login Button -->
-                <button 
-                    type="submit" 
-                    class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold shadow-card hover:shadow-soft-hover transition-all duration-200"
-                >
-                    <i class="fas fa-sign-in-alt mr-2"></i>
-                    Sign In
-                </button>
-            </form>
-
-            <!-- OTP Login Form -->
-            <form id="otpLoginForm" class="space-y-6 slide-up hidden">
-                <!-- Email Field -->
-                <div class="input-group">
-                    <input 
-                        type="email" 
-                        id="otpEmail" 
-                        name="otpEmail" 
-                        placeholder="Enter your email"
-                        class="input-field w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                        required
-                    >
-                    <i class="fas fa-envelope input-icon"></i>
-                </div>
-
-                <!-- Send OTP Button -->
-                <button 
-                    type="button" 
-                    id="sendOtpBtn"
-                    class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold shadow-card hover:shadow-soft-hover transition-all duration-200"
-                >
-                    <i class="fas fa-paper-plane mr-2"></i>
-                    Send OTP
-                </button>
-
-                <!-- OTP Field (Initially Hidden) -->
-                <div id="otpInputContainer" class="hidden">
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="otpCode" 
-                            name="otpCode" 
-                            placeholder="Enter 6-digit OTP"
-                            class="input-field w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-                            maxlength="6"
-                            pattern="[0-9]{6}"
-                            required
-                        >
-                        <i class="fas fa-key input-icon"></i>
-                    </div>
-                    
-                    <!-- Timer -->
-                    <div class="text-center text-sm text-muted mt-2">
-                        <span id="otpTimer">OTP expires in: 5:00</span>
-                    </div>
-
-                    <!-- Verify OTP Button -->
-                    <button 
-                        type="submit" 
-                        id="verifyOtpBtn"
-                        class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold shadow-card hover:shadow-soft-hover transition-all duration-200 mt-4"
-                    >
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Verify & Login
-                    </button>
-                    
-                    <!-- Resend OTP -->
-                    <div class="text-center mt-3">
-                        <button 
-                            type="button" 
-                            id="resendOtpBtn"
-                            class="text-primary hover:text-primary-dark text-sm font-medium"
-                            disabled
-                        >
-                            Resend OTP
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- Google login button has been removed -->
-
-            <!-- Sign Up Link -->
-            <div class="text-center mt-8 slide-up">
-                <p class="text-muted text-sm">
-                    Don't have an account? 
-                    <a href="signup.html" class="text-primary hover:text-primary-dark font-semibold transition-colors duration-200">Sign up here</a>
-                </p>
-            </div>
-
-            <!-- Back to Home -->
-            <div class="text-center mt-4">
-                <a href="index.html" class="text-muted hover:text-primary transition-colors duration-200 text-sm">
-                    <i class="fas fa-arrow-left mr-1"></i>
-                    Back to Home
-                </a>
-            </div>
-        </div>
+<body class="flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-400 rounded-full mx-auto flex items-center justify-center">
+        <img src="images/garam-doodh-logo.png" alt="Logo" class="w-10 h-10" />
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mt-4">Welcome Back</h1>
+      <p class="text-gray-500 text-sm">Sign in to your GaramDoodh account</p>
     </div>
 
-    <!-- Google login functionality has been removed -->
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <button id="passwordTab" class="flex-1 py-2 font-medium text-indigo-600 border-b-2 border-indigo-500">
+        <i class="fas fa-lock mr-2"></i>Password
+      </button>
+      <button id="otpTab" class="flex-1 py-2 font-medium text-gray-500 border-b-2 border-transparent hover:text-indigo-600">
+        <i class="fas fa-key mr-2"></i>OTP Login
+      </button>
+    </div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/auth-guard.js"></script>
-    <script>
-        // Tab switching functionality
-        document.getElementById('passwordTabBtn').addEventListener('click', function() {
-            // Update tab buttons
-            this.classList.add('border-primary', 'text-primary');
-            this.classList.remove('border-transparent', 'text-muted');
-            document.getElementById('otpTabBtn').classList.remove('border-primary', 'text-primary');
-            document.getElementById('otpTabBtn').classList.add('border-transparent', 'text-muted');
-            
-            // Show password form, hide OTP form
-            document.getElementById('passwordLoginForm').classList.remove('hidden');
-            document.getElementById('otpLoginForm').classList.add('hidden');
+    <!-- PASSWORD LOGIN FORM -->
+    <form id="passwordForm" class="space-y-5">
+      <div>
+        <input
+          type="email"
+          id="email"
+          placeholder="Enter your email"
+          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          required
+        />
+      </div>
+      <div>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          required
+        />
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <label class="flex items-center">
+          <input type="checkbox" class="mr-2 text-indigo-600" /> Remember me
+        </label>
+        <a href="#" class="text-indigo-600 hover:text-indigo-800">Forgot password?</a>
+      </div>
+      <button
+        type="submit"
+        id="signInBtn"
+        class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
+      >
+        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+      </button>
+    </form>
+
+    <!-- OTP LOGIN FORM -->
+    <form id="otpForm" class="space-y-5 hidden">
+      <div>
+        <input
+          type="email"
+          id="otpEmail"
+          placeholder="Enter your email"
+          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          required
+        />
+      </div>
+      <button
+        type="button"
+        id="sendOtpBtn"
+        class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
+      >
+        <i class="fas fa-paper-plane mr-2"></i>Send OTP
+      </button>
+
+      <div id="otpInputContainer" class="hidden space-y-3">
+        <input
+          type="text"
+          id="otpCode"
+          maxlength="6"
+          placeholder="Enter 6-digit OTP"
+          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+        />
+        <div class="text-center text-sm text-gray-500">
+          <span id="otpTimer">OTP expires in: 5:00</span>
+        </div>
+        <button
+          type="submit"
+          id="verifyOtpBtn"
+          class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
+        >
+          <i class="fas fa-check-circle mr-2"></i>Verify & Login
+        </button>
+        <button
+          type="button"
+          id="resendOtpBtn"
+          class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mx-auto block"
+          disabled
+        >
+          Resend OTP
+        </button>
+      </div>
+    </form>
+
+    <div class="text-center mt-8 text-sm text-gray-600">
+      Don't have an account?
+      <a href="signup.html" class="text-indigo-600 hover:text-indigo-800 font-semibold">Sign up here</a>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="index.html" class="text-gray-500 hover:text-indigo-600 text-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Home
+      </a>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Notification
+    function notify(msg, type = "info") {
+      const div = document.createElement("div");
+      div.className = `notification fixed top-4 right-4 px-5 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
+        type === "success"
+          ? "bg-green-500"
+          : type === "error"
+          ? "bg-red-500"
+          : "bg-indigo-600"
+      }`;
+      div.textContent = msg;
+      document.body.appendChild(div);
+      setTimeout(() => div.remove(), 3000);
+    }
+
+    // Toggle Tabs
+    const passwordTab = document.getElementById("passwordTab");
+    const otpTab = document.getElementById("otpTab");
+    const passwordForm = document.getElementById("passwordForm");
+    const otpForm = document.getElementById("otpForm");
+
+    passwordTab.addEventListener("click", () => {
+      passwordTab.classList.add("text-indigo-600", "border-indigo-500");
+      otpTab.classList.remove("text-indigo-600", "border-indigo-500");
+      passwordForm.classList.remove("hidden");
+      otpForm.classList.add("hidden");
+    });
+
+    otpTab.addEventListener("click", () => {
+      otpTab.classList.add("text-indigo-600", "border-indigo-500");
+      passwordTab.classList.remove("text-indigo-600", "border-indigo-500");
+      otpForm.classList.remove("hidden");
+      passwordForm.classList.add("hidden");
+    });
+
+    // Password Login
+    document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const btn = document.getElementById("signInBtn");
+
+      if (!email || !password) return notify("Please fill in all fields", "error");
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+
+      try {
+        const res = await fetch("/.netlify/functions/auth-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
-        
-        document.getElementById('otpTabBtn').addEventListener('click', function() {
-            // Update tab buttons
-            this.classList.add('border-primary', 'text-primary');
-            this.classList.remove('border-transparent', 'text-muted');
-            document.getElementById('passwordTabBtn').classList.remove('border-primary', 'text-primary');
-            document.getElementById('passwordTabBtn').classList.add('border-transparent', 'text-muted');
-            
-            // Show OTP form, hide password form
-            document.getElementById('otpLoginForm').classList.remove('hidden');
-            document.getElementById('passwordLoginForm').classList.add('hidden');
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
+          localStorage.setItem("garamdoodh_token", data.data.token);
+          notify("Login successful! Redirecting...", "success");
+          setTimeout(() => (window.location.href = "index.html"), 1500);
+        } else notify(data.message || "Login failed", "error");
+      } catch {
+        notify("Network error. Please try again.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Sign In';
+      }
+    });
+
+    // OTP Send
+    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+      const email = document.getElementById("otpEmail").value.trim();
+      if (!email) return notify("Enter your email", "error");
+      notify("Sending OTP...", "info");
+
+      try {
+        const res = await fetch("/.netlify/functions/auth-otp-generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
         });
-        
-        // Send OTP button handling
-        document.getElementById('sendOtpBtn').addEventListener('click', async function() {
-            const email = document.getElementById('otpEmail').value;
-            
-            // Basic validation
-            if (!email) {
-                showNotification('Please enter your email address', 'error');
-                return;
-            }
-            
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showNotification('Please enter a valid email address', 'error');
-                return;
-            }
-            
-            // Show loading state
-            setButtonLoading(this, true);
-            showNotification('Sending OTP...', 'info');
-            
-            try {
-                console.log('🔍 Generating OTP for:', email);
-                
-                const response = await fetch('/.netlify/functions/auth-otp-generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email })
-                });
+        const data = await res.json();
 
-                console.log('📊 OTP generation response status:', response.status);
-                const data = await response.json();
-                console.log('📋 OTP generation response data:', data);
+        if (res.ok && data.success) {
+          notify("OTP sent! Check your email.", "success");
+          document.getElementById("otpInputContainer").classList.remove("hidden");
+          startOtpTimer();
+        } else notify("Failed to send OTP", "error");
+      } catch {
+        notify("Network error. Try again.", "error");
+      }
+    });
 
-                if (response.ok && data.success) {
-                    showNotification('OTP sent successfully! Check your email.', 'success');
-                    
-                    // Show OTP input field
-                    document.getElementById('otpInputContainer').classList.remove('hidden');
-                    
-                    // Start OTP timer
-                    startOtpTimer();
-                } else {
-                    console.error('❌ OTP generation failed:', data.message);
-                    showNotification(data.message || 'Failed to send OTP', 'error');
-                }
-            } catch (error) {
-                console.error('💥 OTP generation error:', error);
-                showNotification('Network error. Please try again.', 'error');
-            } finally {
-                setButtonLoading(this, false);
-            }
+    // OTP Verify
+    document.getElementById("otpForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("otpEmail").value.trim();
+      const otp = document.getElementById("otpCode").value.trim();
+      const btn = document.getElementById("verifyOtpBtn");
+
+      if (!otp) return notify("Enter your OTP", "error");
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verifying...';
+
+      try {
+        const res = await fetch("/.netlify/functions/auth-otp-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp }),
         });
-        
-        // OTP verification form submission
-        document.getElementById('otpLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('otpEmail').value;
-            const otp = document.getElementById('otpCode').value;
-            
-            // Basic validation
-            if (!email || !otp) {
-                showNotification('Please fill in all fields', 'error');
-                return;
-            }
-            
-            // OTP validation
-            if (otp.length !== 6 || !/^\d+$/.test(otp)) {
-                showNotification('Please enter a valid 6-digit OTP', 'error');
-                return;
-            }
-            
-            // Show loading state
-            const verifyBtn = document.getElementById('verifyOtpBtn');
-            setButtonLoading(verifyBtn, true);
-            showNotification('Verifying OTP...', 'info');
-            
-            try {
-                console.log('🔍 Verifying OTP for:', email);
-                
-                const response = await fetch('/.netlify/functions/auth-otp-verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, otp })
-                });
+        const data = await res.json();
 
-                console.log('📊 OTP verification response status:', response.status);
-                const data = await response.json();
-                console.log('📋 OTP verification response data:', data);
+        if (res.ok && data.success) {
+          localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
+          localStorage.setItem("garamdoodh_token", data.data.token);
+          notify("Login successful!", "success");
+          setTimeout(() => (window.location.href = "index.html"), 1500);
+        } else notify(data.message || "Invalid OTP", "error");
+      } catch {
+        notify("Network error", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify & Login';
+      }
+    });
 
-                if (response.ok && data.success) {
-                    showNotification('OTP verified successfully! Redirecting...', 'success');
-                    
-                    // Store user data
-                    localStorage.setItem('garamdoodh_user', JSON.stringify(data.data.user));
-                    localStorage.setItem('garamdoodh_token', data.data.token);
-                    
-                    // Check for return URL
-                    const returnUrl = localStorage.getItem('garamdoodh_return_url');
-                    const redirectUrl = returnUrl || 'index.html';
-                    
-                    // Clear return URL
-                    if (returnUrl) {
-                        localStorage.removeItem('garamdoodh_return_url');
-                    }
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    console.error('❌ OTP verification failed:', data.message);
-                    showNotification(data.message || 'Invalid or expired OTP', 'error');
-                }
-            } catch (error) {
-                console.error('💥 OTP verification error:', error);
-                showNotification('Network error. Please try again.', 'error');
-            } finally {
-                setButtonLoading(verifyBtn, false);
-            }
-        });
-        
-        // OTP timer functionality
-        let otpTimerInterval;
-        function startOtpTimer() {
-            // Clear any existing timer
-            if (otpTimerInterval) {
-                clearInterval(otpTimerInterval);
-            }
-            
-            // Set initial time (5 minutes)
-            let timeLeft = 5 * 60;
-            const timerElement = document.getElementById('otpTimer');
-            const resendButton = document.getElementById('resendOtpBtn');
-            
-            // Disable resend button initially
-            resendButton.disabled = true;
-            
-            // Update timer every second
-            otpTimerInterval = setInterval(() => {
-                timeLeft--;
-                
-                // Format time as MM:SS
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerElement.textContent = `OTP expires in: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                // Enable resend button when timer reaches 0
-                if (timeLeft <= 0) {
-                    clearInterval(otpTimerInterval);
-                    timerElement.textContent = 'OTP expired';
-                    resendButton.disabled = false;
-                }
-            }, 1000);
+    // OTP Timer
+    let otpTimer;
+    function startOtpTimer() {
+      clearInterval(otpTimer);
+      let timeLeft = 5 * 60;
+      const timerEl = document.getElementById("otpTimer");
+      const resendBtn = document.getElementById("resendOtpBtn");
+      resendBtn.disabled = true;
+
+      otpTimer = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = String(timeLeft % 60).padStart(2, "0");
+        timerEl.textContent = `OTP expires in: ${m}:${s}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(otpTimer);
+          timerEl.textContent = "OTP expired";
+          resendBtn.disabled = false;
         }
-        
-        // Resend OTP button
-        document.getElementById('resendOtpBtn').addEventListener('click', function() {
-            // Trigger the send OTP button click
-            document.getElementById('sendOtpBtn').click();
-        });
-        
-        // Form submission handling
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Basic validation
-            if (!email || !password) {
-                showNotification('Please fill in all fields', 'error');
-                return;
-            }
-            
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showNotification('Please enter a valid email address', 'error');
-                return;
-            }
-            
-            // Show loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
-            setButtonLoading(submitBtn, true);
-            showNotification('Logging in...', 'info');
-            
-            try {
-                console.log('🔍 Attempting login for:', email);
-                
-                const response = await fetch('/.netlify/functions/auth-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+      }, 1000);
+    }
 
-                console.log('📊 Login response status:', response.status);
-                const data = await response.json();
-                console.log('📋 Login response data:', data);
-
-                if (response.ok && data.success) {
-                    showNotification('Login successful! Redirecting...', 'success');
-                    
-                    // Store user data
-                    localStorage.setItem('garamdoodh_user', JSON.stringify(data.data.user));
-                    localStorage.setItem('garamdoodh_token', data.data.token);
-                    
-                    // Check for return URL
-                    const returnUrl = localStorage.getItem('garamdoodh_return_url');
-                    const redirectUrl = returnUrl || 'index.html';
-                    
-                    // Clear return URL
-                    if (returnUrl) {
-                        localStorage.removeItem('garamdoodh_return_url');
-                    }
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    console.error('❌ Login failed:', data.message);
-                    showNotification(data.message || 'Login failed', 'error');
-                }
-            } catch (error) {
-                console.error('💥 Login error:', error);
-                showNotification('Network error. Please try again.', 'error');
-            } finally {
-                setButtonLoading(submitBtn, false);
-            }
-        });
-
-        // Google Login handling
-        document.getElementById('googleLoginBtn').addEventListener('click', function() {
-            showNotification('Redirecting to Google...', 'info');
-            initializeGoogleSignIn();
-        });
-
-        // Initialize Google Sign-In
-        function initializeGoogleSignIn() {
-            console.log('🔍 Initializing Google Sign-In...');
-            
-            // Check if Google OAuth is configured
-            if (!checkGoogleOAuthConfig()) {
-                showNotification('Google OAuth not configured. Please set up Google Client ID.', 'error');
-                return;
-            }
-            
-            if (typeof google !== 'undefined' && google.accounts) {
-                google.accounts.id.initialize({
-                    client_id: GOOGLE_OAUTH_CONFIG.clientId,
-                    callback: handleGoogleResponse,
-                    auto_select: false,
-                    cancel_on_tap_outside: true
-                });
-                
-                console.log('✅ Google Sign-In initialized, showing prompt...');
-                google.accounts.id.prompt();
-            } else {
-                console.error('❌ Google Sign-In library not loaded');
-                showNotification('Google Sign-In not available. Please try again.', 'error');
-            }
-        }
-
-        // Handle Google OAuth response
-        async function handleGoogleResponse(response) {
-            try {
-                console.log('🔍 Processing Google OAuth response...');
-                showNotification('Processing Google login...', 'info');
-                
-                // Decode the JWT token
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                console.log('📧 Google OAuth payload:', {
-                    sub: payload.sub,
-                    email: payload.email,
-                    name: payload.name,
-                    picture: payload.picture
-                });
-                
-                // Send to backend
-                console.log('📤 Sending Google OAuth data to backend...');
-                const backendResponse = await fetch('/.netlify/functions/auth-google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        googleId: payload.sub,
-                        email: payload.email,
-                        name: payload.name,
-                        picture: payload.picture
-                    })
-                });
-
-                console.log('📊 Backend response status:', backendResponse.status);
-                const result = await backendResponse.json();
-                console.log('📋 Backend response data:', result);
-
-                if (result.success) {
-                    console.log('✅ Google login successful!');
-                    showNotification('Google login successful!', 'success');
-                    
-                    // Store user data
-                    localStorage.setItem('garamdoodh_user', JSON.stringify(result.data.user));
-                    localStorage.setItem('garamdoodh_token', result.data.token);
-                    
-                    // Check for return URL
-                    const returnUrl = localStorage.getItem('garamdoodh_return_url');
-                    const redirectUrl = returnUrl || 'index.html';
-                    
-                    // Clear return URL
-                    if (returnUrl) {
-                        localStorage.removeItem('garamdoodh_return_url');
-                    }
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    console.error('❌ Google login failed:', result.message);
-                    showNotification(result.message || 'Google login failed', 'error');
-                }
-            } catch (error) {
-                console.error('💥 Google login error:', error);
-                showNotification('Google login failed. Please try again.', 'error');
-            }
-        }
-
-        // Notification system
-        function showNotification(message, type = 'info') {
-            // Remove existing notifications
-            const existingNotification = document.querySelector('.notification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-            
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transform transition-all duration-300 translate-x-full`;
-            
-            // Set colors based on type
-            switch(type) {
-                case 'success':
-                    notification.style.backgroundColor = '#28a745';
-                    break;
-                case 'error':
-                    notification.style.backgroundColor = '#dc3545';
-                    break;
-                case 'info':
-                default:
-                    notification.style.backgroundColor = '#4F46E5';
-                    break;
-            }
-            
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            // Animate in
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        // Add focus effects to form inputs
-        document.querySelectorAll('.input-field').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('ring-2', 'ring-primary', 'ring-opacity-20');
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('ring-2', 'ring-primary', 'ring-opacity-20');
-            });
-        });
-
-        // Add loading state to buttons
-        function setButtonLoading(button, loading = true) {
-            if (loading) {
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
-            } else {
-                button.disabled = false;
-                if (button.id === 'googleLoginBtn') {
-                    button.innerHTML = `
-                        <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continue with Google
-                    `;
-                } else {
-                    button.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Sign In';
-                }
-            }
-        }
-    </script>
+    document.getElementById("resendOtpBtn").addEventListener("click", () => {
+      document.getElementById("sendOtpBtn").click();
+    });
+  </script>
 </body>
 </html>
