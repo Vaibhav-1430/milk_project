@@ -241,4 +241,53 @@ router.get('/analytics', adminAuth, async (req, res) => {
   }
 });
 
+/* -----------------------------------------------------------------
+   ✅ NEW SECTION — ADMIN ORDER MANAGEMENT (isPlaced Checkbox)
+------------------------------------------------------------------*/
+
+/**
+ * @route   GET /api/admin/orders
+ * @desc    Get all orders for Admin Portal
+ * @access  Private (Admin)
+ */
+router.get('/orders', adminAuth, async (req, res) => {
+  try {
+    const { limit = 100, skip = 0 } = req.query;
+    const orders = await Order.find()
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(parseInt(skip))
+      .limit(parseInt(limit));
+
+    res.json({ success: true, orders });
+  } catch (error) {
+    console.error('Admin get orders error:', error);
+    res.status(500).json({ success: false, message: 'Server error while fetching orders' });
+  }
+});
+
+/**
+ * @route   PUT /api/admin/orders/:id/placed
+ * @desc    Toggle order placed status
+ * @access  Private (Admin)
+ */
+router.put('/orders/:id/placed', adminAuth, async (req, res) => {
+  try {
+    const { placed } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    order.isPlaced = placed;
+    await order.save();
+
+    res.json({ success: true, message: 'Order updated successfully', order });
+  } catch (error) {
+    console.error('Update order placed error:', error);
+    res.status(500).json({ success: false, message: 'Server error while updating order status' });
+  }
+});
+
 module.exports = router;
