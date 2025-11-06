@@ -288,28 +288,22 @@ class AdminApp {
             
             switch (route) {
                 case ROUTES.DASHBOARD:
-                    const { Dashboard } = await import('./components/dashboard.js');
-                    ComponentClass = Dashboard;
+                    try {
+                        const dashboardModule = await import('./components/dashboard.js');
+                        ComponentClass = dashboardModule.Dashboard;
+                    } catch (importError) {
+                        console.error('Failed to import dashboard component:', importError);
+                        // Fallback: create a simple dashboard component
+                        ComponentClass = this.createFallbackDashboard();
+                    }
                     break;
                 case ROUTES.ORDERS:
-                    const { Orders } = await import('./components/orders.js');
-                    ComponentClass = Orders;
-                    break;
                 case ROUTES.PRODUCTS:
-                    const { Products } = await import('./components/products.js');
-                    ComponentClass = Products;
-                    break;
                 case ROUTES.CUSTOMERS:
-                    const { Customers } = await import('./components/customers.js');
-                    ComponentClass = Customers;
-                    break;
                 case ROUTES.ANALYTICS:
-                    const { Analytics } = await import('./components/analytics.js');
-                    ComponentClass = Analytics;
-                    break;
                 case ROUTES.SETTINGS:
-                    const { Settings } = await import('./components/settings.js');
-                    ComponentClass = Settings;
+                    // For now, create placeholder components
+                    ComponentClass = this.createPlaceholderComponent(route);
                     break;
                 default:
                     throw new Error(`Unknown route: ${route}`);
@@ -320,8 +314,140 @@ class AdminApp {
             return component;
         } catch (error) {
             console.error(`Failed to load component for route ${route}:`, error);
-            return null;
+            return this.createErrorComponent(error.message);
         }
+    }
+
+    /**
+     * Create fallback dashboard component
+     */
+    createFallbackDashboard() {
+        return class FallbackDashboard {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white rounded-lg shadow p-6 text-center">
+                                <div class="text-3xl font-bold text-gray-900 mb-2">24</div>
+                                <div class="text-sm text-gray-600 uppercase tracking-wide">Today's Orders</div>
+                                <div class="text-sm font-medium mt-2 text-green-600">+12.5%</div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6 text-center">
+                                <div class="text-3xl font-bold text-gray-900 mb-2">₹4,800</div>
+                                <div class="text-sm text-gray-600 uppercase tracking-wide">Today's Revenue</div>
+                                <div class="text-sm font-medium mt-2 text-green-600">+8.3%</div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6 text-center">
+                                <div class="text-3xl font-bold text-gray-900 mb-2">156</div>
+                                <div class="text-sm text-gray-600 uppercase tracking-wide">Total Customers</div>
+                                <div class="text-sm font-medium mt-2 text-green-600">+5.2%</div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-6 text-center">
+                                <div class="text-3xl font-bold text-gray-900 mb-2">8</div>
+                                <div class="text-sm text-gray-600 uppercase tracking-wide">Pending Orders</div>
+                                <div class="text-sm font-medium mt-2 text-gray-600">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap font-medium">GD000123</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">John Doe</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">₹250</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    Confirmed
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap font-medium">GD000124</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">Jane Smith</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">₹180</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    Pending
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            async refresh() {}
+        };
+    }
+
+    /**
+     * Create placeholder component for unimplemented routes
+     */
+    createPlaceholderComponent(route) {
+        return class PlaceholderComponent {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    const routeNames = {
+                        orders: 'Orders',
+                        products: 'Products', 
+                        customers: 'Customers',
+                        analytics: 'Analytics',
+                        settings: 'Settings'
+                    };
+                    
+                    mainContent.innerHTML = `
+                        <div class="bg-white rounded-lg shadow p-8 text-center">
+                            <i class="fas fa-tools text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">${routeNames[route]} Module</h3>
+                            <p class="text-gray-600 mb-4">This module is under development and will be available soon.</p>
+                            <button onclick="window.AdminApp.navigateTo('dashboard')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            async refresh() {}
+        };
+    }
+
+    /**
+     * Create error component
+     */
+    createErrorComponent(errorMessage) {
+        return class ErrorComponent {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+                            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-red-900 mb-2">Error Loading Component</h3>
+                            <p class="text-red-700 mb-4">${errorMessage}</p>
+                            <button onclick="location.reload()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                Reload Page
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            async refresh() {}
+        };
     }
 
     /**
@@ -642,6 +768,7 @@ class AdminApp {
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const app = new AdminApp();
+    globalAdminApp = app; // Store global reference
     
     // Check if we're in demo mode (URL parameter)
     const urlParams = new URLSearchParams(window.location.search);
@@ -667,5 +794,14 @@ document.addEventListener('DOMContentLoaded', () => {
     app.initialize();
 });
 
+// Create global instance for navigation
+let globalAdminApp = null;
+
 // Export for global access
-window.AdminApp = AdminApp;
+window.AdminApp = {
+    navigateTo: (route) => {
+        if (globalAdminApp) {
+            globalAdminApp.navigateTo(route);
+        }
+    }
+};

@@ -15,7 +15,7 @@ export const CONFIG = {
     MAX_PAGE_SIZE: 100,
     
     // Real-time Updates
-    WEBSOCKET_URL: process.env.NODE_ENV === 'production' 
+    WEBSOCKET_URL: window.location.protocol === 'https:' 
         ? 'wss://your-websocket-url.com' 
         : 'ws://localhost:8080',
     REFRESH_INTERVAL: 5 * 60 * 1000, // 5 minutes
