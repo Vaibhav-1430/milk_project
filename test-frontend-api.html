@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Frontend API Test</h1>
+    <p>This page tests the admin API calls from the frontend perspective.</p>
+    
+    <button onclick="testLogin()">1. Test Login</button>
+    <button onclick="testDashboard()">2. Test Dashboard API</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        let adminToken = null;
+        
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            addResult('🔍 Testing admin login...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@garamdoodh.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    adminToken = data.data.token;
+                    addResult(`✅ Login successful! Token: ${adminToken.substring(0, 20)}...`);
+                    addResult(`👤 User: ${data.data.user.name} (${data.data.user.role})`);
+                } else {
+                    addResult(`❌ Login failed: ${data.message}`, false);
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, false);
+            }
+        }
+        
+        async function testDashboard() {
+            if (!adminToken) {
+                addResult('❌ Please login first!', false);
+                return;
+            }
+            
+            addResult('📊 Testing dashboard API...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addResult('✅ Dashboard API successful!');
+                    addResult(`📊 Today's Orders: ${data.data.metrics.todayOrders}`);
+                    addResult(`👥 Total Customers: ${data.data.metrics.totalCustomers}`);
+                    addResult(`⏳ Pending Orders: ${data.data.metrics.pendingOrders}`);
+                    addResult(`💰 Today's Revenue: ₹${data.data.metrics.todayRevenue}`);
+                    
+                    if (data.data.recentOrders.length > 0) {
+                        addResult(`📋 Recent Orders (${data.data.recentOrders.length}):`);
+                        data.data.recentOrders.forEach((order, index) => {
+                            addResult(`   ${index + 1}. ${order.id} - ${order.customer} - ₹${order.amount} - ${order.status}`);
+                        });
+                    } else {
+                        addResult('📋 No recent orders found');
+                    }
+                    
+                    if (data.data.alerts.length > 0) {
+                        addResult(`🚨 Alerts (${data.data.alerts.length}):`);
+                        data.data.alerts.forEach((alert, index) => {
+                            addResult(`   ${index + 1}. [${alert.type.toUpperCase()}] ${alert.title}: ${alert.message}`);
+                        });
+                    } else {
+                        addResult('🚨 No alerts');
+                    }
+                } else {
+                    addResult(`❌ Dashboard API failed: ${data.message}`, false);
+                }
+            } catch (error) {
+                addResult(`❌ Dashboard API error: ${error.message}`, false);
+            }
+        }
+        
+        // Auto-run tests
+        window.addEventListener('load', () => {
+            addResult('🚀 Frontend API Test loaded. Click buttons to test.');
+        });
+    </script>
+</body>
+</html>

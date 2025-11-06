@@ -269,6 +269,8 @@ export class Dashboard {
      * Render metrics cards
      */
     renderMetrics() {
+        console.log('🎨 Rendering metrics:', this.metrics);
+        
         const elements = {
             todayOrders: document.getElementById('todayOrders'),
             todayRevenue: document.getElementById('todayRevenue'),
@@ -283,10 +285,29 @@ export class Dashboard {
             customersChange: document.getElementById('customersChange')
         };
 
-        if (elements.todayOrders) elements.todayOrders.textContent = formatNumber(this.metrics.todayOrders);
-        if (elements.todayRevenue) elements.todayRevenue.textContent = formatCurrency(this.metrics.todayRevenue);
-        if (elements.totalCustomers) elements.totalCustomers.textContent = formatNumber(this.metrics.totalCustomers);
-        if (elements.pendingOrders) elements.pendingOrders.textContent = formatNumber(this.metrics.pendingOrders);
+        // Check if elements exist
+        Object.keys(elements).forEach(key => {
+            if (!elements[key]) {
+                console.warn(`❌ Element not found: ${key}`);
+            }
+        });
+
+        if (elements.todayOrders) {
+            elements.todayOrders.textContent = formatNumber(this.metrics.todayOrders);
+            console.log('✅ Updated todayOrders:', this.metrics.todayOrders);
+        }
+        if (elements.todayRevenue) {
+            elements.todayRevenue.textContent = formatCurrency(this.metrics.todayRevenue);
+            console.log('✅ Updated todayRevenue:', this.metrics.todayRevenue);
+        }
+        if (elements.totalCustomers) {
+            elements.totalCustomers.textContent = formatNumber(this.metrics.totalCustomers);
+            console.log('✅ Updated totalCustomers:', this.metrics.totalCustomers);
+        }
+        if (elements.pendingOrders) {
+            elements.pendingOrders.textContent = formatNumber(this.metrics.pendingOrders);
+            console.log('✅ Updated pendingOrders:', this.metrics.pendingOrders);
+        }
         if (elements.weeklyRevenue) elements.weeklyRevenue.textContent = formatCurrency(this.metrics.weeklyRevenue);
         if (elements.monthlyRevenue) elements.monthlyRevenue.textContent = formatCurrency(this.metrics.monthlyRevenue);
         if (elements.lowStockCount) elements.lowStockCount.textContent = formatNumber(this.metrics.lowStockCount);
@@ -305,16 +326,24 @@ export class Dashboard {
             elements.customersChange.textContent = `+${this.metrics.customersChange}%`;
             elements.customersChange.className = 'metric-change positive';
         }
+        
+        console.log('✅ Metrics rendering complete');
     }
 
     /**
      * Render recent orders table
      */
     renderRecentOrders() {
+        console.log('📋 Rendering recent orders:', this.recentOrders);
+        
         const tableBody = document.getElementById('recentOrdersTable');
-        if (!tableBody) return;
+        if (!tableBody) {
+            console.error('❌ recentOrdersTable element not found');
+            return;
+        }
 
         if (this.recentOrders.length === 0) {
+            console.log('ℹ️ No recent orders to display');
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="5" class="text-center py-8 text-gray-500">
@@ -325,19 +354,26 @@ export class Dashboard {
             return;
         }
 
-        tableBody.innerHTML = this.recentOrders.map(order => `
-            <tr class="hover:bg-gray-50">
-                <td class="font-medium">${order.id}</td>
-                <td>${order.customer}</td>
-                <td>${formatCurrency(order.amount)}</td>
-                <td>
-                    <span class="status-badge status-${order.status}">
-                        ${this.formatStatus(order.status)}
-                    </span>
-                </td>
-                <td class="text-gray-500">${formatRelativeTime(order.createdAt)}</td>
-            </tr>
-        `).join('');
+        console.log(`✅ Rendering ${this.recentOrders.length} recent orders`);
+        
+        tableBody.innerHTML = this.recentOrders.map(order => {
+            console.log('📋 Rendering order:', order);
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="font-medium">${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${formatCurrency(order.amount)}</td>
+                    <td>
+                        <span class="status-badge status-${order.status}">
+                            ${this.formatStatus(order.status)}
+                        </span>
+                    </td>
+                    <td class="text-gray-500">${formatRelativeTime(order.createdAt)}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        console.log('✅ Recent orders rendering complete');
     }
 
     /**
