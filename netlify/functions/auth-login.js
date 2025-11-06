@@ -59,15 +59,24 @@ exports.handler = async (event) => {
         console.log('🎫 Generating JWT token...');
         const token = generateToken(user._id);
         console.log('✅ Login successful for user:', user.email);
+        console.log('👤 User role:', user.role);
         
         // Remove password from response
         const userResponse = user.toObject();
         delete userResponse.password;
         
+        // Add admin flag for frontend detection
+        const isAdmin = user.role === 'admin';
+        console.log('🔐 Is admin user:', isAdmin);
+        
         return json({ 
             success: true, 
-            message: 'Login successful', 
-            data: { user: userResponse, token } 
+            message: isAdmin ? 'Admin login successful' : 'Login successful',
+            data: { 
+                user: userResponse, 
+                token,
+                isAdmin 
+            } 
         });
     } catch (error) {
         console.error('💥 Login error:', error);

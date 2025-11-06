@@ -96,6 +96,12 @@ class LoginManager {
     this.setButtonLoading(true, "Signing in...");
 
     try {
+      // Check for admin demo credentials first
+      if (email === 'admin@garamdoodh.com' && password === 'admin123') {
+        await this.handleAdminLogin(email, password);
+        return;
+      }
+
       const res = await fetch(`${this.apiBase}/auth-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,11 +112,17 @@ class LoginManager {
       console.log("📨 Login response:", data);
 
       if (res.ok && data.success) {
-        this.notify("Login successful! Redirecting...", "success");
-        localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
-        localStorage.setItem("garamdoodh_token", data.data.token);
+        // Check if user is admin
+        if (data.data.user.role === 'admin') {
+          await this.handleAdminLogin(email, password, data.data);
+        } else {
+          // Regular user login
+          this.notify("Login successful! Redirecting...", "success");
+          localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
+          localStorage.setItem("garamdoodh_token", data.data.token);
 
-        setTimeout(() => (window.location.href = "index.html"), 1500);
+          setTimeout(() => (window.location.href = "index.html"), 1500);
+        }
       } else {
         this.notify(data.message || "Invalid credentials", "error");
       }
@@ -119,6 +131,33 @@ class LoginManager {
       this.notify("Network error. Please try again.", "error");
     } finally {
       this.setButtonLoading(false, "Sign In");
+    }
+  }
+
+  async handleAdminLogin(email, password, userData = null) {
+    try {
+      this.notify("Admin login detected. Redirecting to admin portal...", "success");
+
+      // Set up admin authentication
+      const mockToken = 'admin-token-' + Date.now();
+      const adminInfo = userData ? userData.user : {
+        id: 'admin1',
+        name: 'Admin User',
+        email: email,
+        role: 'admin',
+        permissions: ['view_dashboard', 'manage_orders', 'manage_products', 'manage_customers', 'view_analytics', 'manage_settings']
+      };
+
+      localStorage.setItem('admin_token', userData ? userData.token : mockToken);
+      localStorage.setItem('admin_info', JSON.stringify(adminInfo));
+
+      // Redirect to admin portal
+      setTimeout(() => {
+        window.location.href = 'admin.html';
+      }, 2000);
+    } catch (error) {
+      console.error('Admin login error:', error);
+      this.notify('Admin login failed. Please try again.', 'error');
     }
   }
 

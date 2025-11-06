@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-indigo-600 mb-2">GaramDoodh</h1>
+            <h2 class="text-xl font-semibold text-gray-900">Admin Setup</h2>
+            <p class="text-gray-600 mt-2">Create admin user for your milk delivery business</p>
+        </div>
+
+        <!-- Setup Message -->
+        <div id="setupMessage" class="hidden p-4 rounded-lg"></div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">Create Admin User</h3>
+            <p class="text-gray-600 mb-4">
+                This will create an admin user with the following credentials:
+            </p>
+            
+            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Email:</strong> admin@garamdoodh.com<br>
+                    <strong>Password:</strong> admin123<br>
+                    <strong>Role:</strong> Admin
+                </p>
+            </div>
+
+            <button 
+                id="createAdminBtn"
+                class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <span id="createBtnText">Create Admin User</span>
+                <i class="fas fa-spinner fa-spin ml-2 hidden" id="createSpinner"></i>
+            </button>
+        </div>
+
+        <div class="text-center">
+            <a href="login.html" class="text-indigo-600 hover:text-indigo-500">
+                ← Back to Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const createAdminBtn = document.getElementById('createAdminBtn');
+            const createBtnText = document.getElementById('createBtnText');
+            const createSpinner = document.getElementById('createSpinner');
+            const setupMessage = document.getElementById('setupMessage');
+
+            createAdminBtn.addEventListener('click', async function() {
+                setLoading(true);
+
+                try {
+                    const response = await fetch('/.netlify/functions/create-admin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        showMessage('Admin user created successfully! You can now login.', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showMessage(result.message || 'Failed to create admin user', 'error');
+                    }
+                } catch (error) {
+                    console.error('Setup error:', error);
+                    showMessage('Network error. Please try again.', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            function setLoading(loading) {
+                createAdminBtn.disabled = loading;
+                createBtnText.textContent = loading ? 'Creating...' : 'Create Admin User';
+                createSpinner.classList.toggle('hidden', !loading);
+            }
+
+            function showMessage(message, type) {
+                setupMessage.className = `p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+                setupMessage.textContent = message;
+                setupMessage.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
