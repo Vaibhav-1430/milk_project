@@ -247,6 +247,8 @@ class AdminApp {
      * Load a specific route
      */
     async loadRoute(route) {
+        console.log('🚀 Loading route:', route);
+        
         // Show loading state
         this.showPageLoading();
 
@@ -255,6 +257,8 @@ class AdminApp {
             const component = await this.loadComponent(route);
             
             if (component) {
+                console.log('✅ Component loaded for route:', route);
+                
                 // Update page title and description
                 this.updatePageInfo(route);
                 
@@ -262,12 +266,16 @@ class AdminApp {
                 this.updateBreadcrumb(route);
                 
                 // Render component
+                console.log('🎨 Rendering component for route:', route);
                 await component.render();
                 
                 this.currentRoute = route;
+                console.log('✅ Route loaded successfully:', route);
+            } else {
+                console.error('❌ No component returned for route:', route);
             }
         } catch (error) {
-            console.error(`Failed to load route ${route}:`, error);
+            console.error(`❌ Failed to load route ${route}:`, error);
             throw error;
         } finally {
             this.hidePageLoading();
@@ -298,8 +306,14 @@ class AdminApp {
                     }
                     break;
                 case ROUTES.ORDERS:
+                    ComponentClass = this.createOrdersComponent();
+                    break;
                 case ROUTES.PRODUCTS:
+                    ComponentClass = this.createProductsComponent();
+                    break;
                 case ROUTES.CUSTOMERS:
+                    ComponentClass = this.createCustomersComponent();
+                    break;
                 case ROUTES.ANALYTICS:
                 case ROUTES.SETTINGS:
                     // For now, create placeholder components
@@ -391,6 +405,329 @@ class AdminApp {
                 }
             }
             async refresh() {}
+        };
+    }
+
+    /**
+     * Create Orders component
+     */
+    createOrdersComponent() {
+        return class OrdersComponent {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-900">Orders Management</h3>
+                                    <p class="text-gray-600">Manage customer orders and deliveries</p>
+                                </div>
+                                <button class="btn-primary">
+                                    <i class="fas fa-plus mr-2"></i>New Order
+                                </button>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order #</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-8 text-gray-500">
+                                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                                <div>Loading orders...</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                await this.loadOrders();
+            }
+            
+            async loadOrders() {
+                try {
+                    const { adminAPI } = await import('./api/admin-api.js');
+                    const response = await adminAPI.getOrders();
+                    
+                    if (response.success) {
+                        this.renderOrders(response.data.orders || []);
+                    } else {
+                        throw new Error(response.message);
+                    }
+                } catch (error) {
+                    console.error('Failed to load orders:', error);
+                    const tbody = document.getElementById('ordersTableBody');
+                    if (tbody) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-red-500">
+                                    Failed to load orders. Please refresh the page.
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+            
+            renderOrders(orders) {
+                const tbody = document.getElementById('ordersTableBody');
+                if (!tbody) return;
+                
+                if (orders.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-8 text-gray-500">
+                                No orders found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = orders.map(order => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="font-medium">${order.orderNumber || order._id}</td>
+                        <td>${order.customer || 'Unknown'}</td>
+                        <td>${order.itemCount || 0} items</td>
+                        <td>₹${order.total || 0}</td>
+                        <td>
+                            <span class="status-badge status-${order.status}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn-secondary btn-sm">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            async refresh() {
+                await this.loadOrders();
+            }
+        };
+    }
+
+    /**
+     * Create Products component
+     */
+    createProductsComponent() {
+        return class ProductsComponent {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-900">Products Management</h3>
+                                    <p class="text-gray-600">Manage your product catalog and inventory</p>
+                                </div>
+                                <button class="btn-primary">
+                                    <i class="fas fa-plus mr-2"></i>Add Product
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="productsGrid">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                    <div>Loading products...</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                await this.loadProducts();
+            }
+            
+            async loadProducts() {
+                try {
+                    const { adminAPI } = await import('./api/admin-api.js');
+                    const response = await adminAPI.getProducts();
+                    
+                    if (response.success) {
+                        this.renderProducts(response.data.products || []);
+                    } else {
+                        throw new Error(response.message);
+                    }
+                } catch (error) {
+                    console.error('Failed to load products:', error);
+                    const grid = document.getElementById('productsGrid');
+                    if (grid) {
+                        grid.innerHTML = `
+                            <div class="col-span-full text-center py-8 text-red-500">
+                                Failed to load products. Please refresh the page.
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            renderProducts(products) {
+                const grid = document.getElementById('productsGrid');
+                if (!grid) return;
+                
+                if (products.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            No products found
+                        </div>
+                    `;
+                    return;
+                }
+                
+                grid.innerHTML = products.map(product => `
+                    <div class="admin-card">
+                        <div class="aspect-w-16 aspect-h-9 mb-4">
+                            <img src="${product.image || '/placeholder.jpg'}" alt="${product.name}" class="w-full h-32 object-cover rounded">
+                        </div>
+                        <h4 class="font-semibold text-gray-900">${product.name}</h4>
+                        <p class="text-sm text-gray-600 mb-2">${product.quantity}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-green-600">₹${product.price}</span>
+                            <span class="text-sm text-gray-500">Stock: ${product.stock}</span>
+                        </div>
+                        <div class="mt-4 flex space-x-2">
+                            <button class="btn-secondary btn-sm flex-1">Edit</button>
+                            <button class="btn-secondary btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            async refresh() {
+                await this.loadProducts();
+            }
+        };
+    }
+
+    /**
+     * Create Customers component
+     */
+    createCustomersComponent() {
+        return class CustomersComponent {
+            async render() {
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="admin-card">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-900">Customers Management</h3>
+                                    <p class="text-gray-600">Manage customer accounts and relationships</p>
+                                </div>
+                                <button class="btn-primary">
+                                    <i class="fas fa-plus mr-2"></i>Add Customer
+                                </button>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Type</th>
+                                            <th>Orders</th>
+                                            <th>Joined</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-8 text-gray-500">
+                                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                                <div>Loading customers...</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                await this.loadCustomers();
+            }
+            
+            async loadCustomers() {
+                try {
+                    const { adminAPI } = await import('./api/admin-api.js');
+                    const response = await adminAPI.getCustomers();
+                    
+                    if (response.success) {
+                        this.renderCustomers(response.data.customers || []);
+                    } else {
+                        throw new Error(response.message);
+                    }
+                } catch (error) {
+                    console.error('Failed to load customers:', error);
+                    const tbody = document.getElementById('customersTableBody');
+                    if (tbody) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-red-500">
+                                    Failed to load customers. Please refresh the page.
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+            
+            renderCustomers(customers) {
+                const tbody = document.getElementById('customersTableBody');
+                if (!tbody) return;
+                
+                if (customers.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-8 text-gray-500">
+                                No customers found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = customers.map(customer => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="font-medium">${customer.name}</td>
+                        <td>${customer.email}</td>
+                        <td>${customer.phone || 'N/A'}</td>
+                        <td>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${customer.customerType === 'college' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                                ${customer.customerType}
+                            </span>
+                        </td>
+                        <td>${customer.orderCount || 0}</td>
+                        <td>${new Date(customer.createdAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn-secondary btn-sm">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            async refresh() {
+                await this.loadCustomers();
+            }
         };
     }
 
@@ -554,7 +891,9 @@ class AdminApp {
      */
     getCurrentRoute() {
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('page') || ROUTES.DASHBOARD;
+        const route = urlParams.get('page') || ROUTES.DASHBOARD;
+        console.log('🔍 Current route:', route, 'URL params:', window.location.search);
+        return route;
     }
 
     /**
