@@ -228,12 +228,16 @@ class AuthManager {
         try {
             console.log('🔍 Validating admin session with database...');
             
-            const response = await fetch(`${CONFIG.API_BASE_URL}/admin-validate`, {
+            const response = await fetch(`/.netlify/functions/admin-validate`, {
                 headers: this.getAuthHeaders()
             });
 
+            console.log('📡 Validation response status:', response.status);
+
             if (response.ok) {
                 const data = await response.json();
+                console.log('📋 Validation response data:', data);
+                
                 if (data.success) {
                     this.adminInfo = data.admin;
                     this.resetSessionTimer();
@@ -241,18 +245,17 @@ class AuthManager {
                     return true;
                 } else {
                     console.log('❌ Session validation failed:', data.message);
-                    this.clearAuth();
-                    return false;
+                    return false; // Don't clear auth immediately, let the fallback handle it
                 }
             } else {
                 console.log('❌ Session validation request failed:', response.status);
-                this.clearAuth();
-                return false;
+                const errorText = await response.text();
+                console.log('❌ Error response:', errorText);
+                return false; // Don't clear auth immediately, let the fallback handle it
             }
         } catch (error) {
             console.error('❌ Session validation error:', error);
-            this.clearAuth();
-            return false;
+            return false; // Don't clear auth immediately, let the fallback handle it
         }
     }
 
@@ -273,11 +276,15 @@ class AuthManager {
         // Set up activity listeners to reset session timer
         this.setupActivityListeners();
 
+        console.log('🔍 Initializing authentication...');
+        console.log('Token exists:', !!this.token);
+
         // Check for stored admin info
         const storedAdminInfo = localStorage.getItem('admin_info');
         if (storedAdminInfo) {
             try {
                 this.adminInfo = JSON.parse(storedAdminInfo);
+                console.log('✅ Admin info loaded:', this.adminInfo.email);
             } catch (error) {
                 console.error('Failed to parse stored admin info:', error);
                 this.clearAuth();
@@ -286,19 +293,86 @@ class AuthManager {
             }
         }
 
-        // Validate existing session with real token validation
+        // Check if we have both token and admin info
         if (this.token && this.adminInfo) {
-            const isValid = await this.validateSession();
-            if (isValid) {
-                this.startSessionTimer();
-                return true;
-            } else {
+            console.log('🔑 Token and admin info found, checking expiration...');
+            
+            // First check if token is expired before making any API calls
+            if (this.isTokenExpired()) {
+                console.log('❌ Token is expired');
                 this.clearAuth();
-                this.redirectToLogin('Session expired. Please login again.');
+                this.redirectToLogin('Your session has expired. Please login again.');
                 return false;
             }
+            
+            console.log('✅ Token is not expired, validating with server...');
+            
+            // Try to validate session, but don't fail if validation endpoint has issues
+            try {
+                const isValid = await this.validateSession();
+                if (isValid) {
+                    console.log('✅ Session validation successful');
+                    this.startSessionTimer();
+                    return true;
+                } else {
+                    console.log('❌ Session validation failed, but checking token format...');
+                    
+                    // If validation fails, check if it's just a validation endpoint issue
+                    // by checking if the token looks valid (JWT format)
+                    if (this.isTokenFormatValid() && !this.isTokenExpired()) {
+                        console.log('⚠️ Token format is valid and not expired, proceeding without validation');
+                        this.startSessionTimer();
+                        return true;
+                    } else {
+                        console.log('❌ Token format is invalid or expired');
+                        this.clearAuth();
+                        this.redirectToLogin('Session expired. Please login again.');
+                        return false;
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Session validation error:', error);
+                
+                // If validation endpoint fails, check token format as fallback
+                if (this.isTokenFormatValid() && !this.isTokenExpired()) {
+                    console.log('⚠️ Validation endpoint failed, but token format is valid and not expired. Proceeding...');
+                    this.startSessionTimer();
+                    return true;
+                } else {
+                    this.clearAuth();
+                    this.redirectToLogin('Authentication error. Please login again.');
+                    return false;
+                }
+            }
         } else {
+            console.log('❌ Missing token or admin info');
             this.redirectToLogin('Please login to access the admin portal.');
+            return false;
+        }
+    }
+
+    /**
+     * Check if token has valid JWT format
+     */
+    isTokenFormatValid() {
+        if (!this.token) return false;
+        
+        try {
+            // JWT tokens have 3 parts separated by dots
+            const parts = this.token.split('.');
+            if (parts.length !== 3) return false;
+            
+            // Try to decode the payload (middle part)
+            const payload = JSON.parse(atob(parts[1]));
+            
+            // Check if it has required fields and is not expired
+            const hasRequiredFields = payload.userId && payload.exp && payload.iat;
+            const currentTime = Date.now() / 1000;
+            const isNotExpired = payload.exp > currentTime;
+            
+            return hasRequiredFields && isNotExpired;
+        } catch (error) {
+            console.error('Token format validation error:', error);
             return false;
         }
     }

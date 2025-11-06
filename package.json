@@ -7,7 +7,9 @@
     "start": "echo 'Netlify functions deployment - no local server'",
     "dev": "netlify dev",
     "build": "echo 'No build step required'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-admin": "node scripts/add-admin.js",
+    "setup-admin": "node scripts/create-admin-user.js"
   },
   "keywords": [
     "milk-delivery",

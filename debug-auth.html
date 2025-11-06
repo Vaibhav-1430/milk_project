@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Authentication - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-red-600 mb-2">🔍 Authentication Debug</h1>
+            <p class="text-gray-600">Debug admin portal authentication issues</p>
+        </div>
+
+        <!-- Current Auth Status -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Current Authentication Status</h3>
+            <div id="authStatus" class="space-y-2 text-sm font-mono"></div>
+            <button id="refreshStatus" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Refresh Status
+            </button>
+        </div>
+
+        <!-- Test Login -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Test Login</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="email" id="testEmail" class="border rounded px-3 py-2" placeholder="admin@garamdoodh.com" value="admin@garamdoodh.com">
+                <input type="password" id="testPassword" class="border rounded px-3 py-2" placeholder="admin123" value="admin123">
+            </div>
+            <button id="testLogin" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Test Login
+            </button>
+            <div id="loginResult" class="mt-4 text-sm"></div>
+        </div>
+
+        <!-- Test Validation -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Test Session Validation</h3>
+            <button id="testValidation" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                Test Validation Endpoint
+            </button>
+            <div id="validationResult" class="mt-4 text-sm"></div>
+        </div>
+
+        <!-- Clear Auth -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Clear Authentication</h3>
+            <button id="clearAuth" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Clear All Auth Data
+            </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="text-center space-x-4">
+            <a href="login.html" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
+                Go to Login
+            </a>
+            <a href="admin.html" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                Try Admin Portal
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function updateAuthStatus() {
+            const token = localStorage.getItem('admin_token');
+            const adminInfo = localStorage.getItem('admin_info');
+            const statusDiv = document.getElementById('authStatus');
+            
+            let status = [];
+            
+            if (token) {
+                status.push(`<div class="text-green-600">✅ Token exists: ${token.substring(0, 20)}...</div>`);
+                
+                // Try to decode token
+                try {
+                    const parts = token.split('.');
+                    if (parts.length === 3) {
+                        const payload = JSON.parse(atob(parts[1]));
+                        status.push(`<div class="text-blue-600">📋 Token payload: ${JSON.stringify(payload, null, 2)}</div>`);
+                        
+                        // Check expiration
+                        const now = Date.now() / 1000;
+                        if (payload.exp && payload.exp > now) {
+                            status.push(`<div class="text-green-600">⏰ Token valid until: ${new Date(payload.exp * 1000).toLocaleString()}</div>`);
+                        } else {
+                            status.push(`<div class="text-red-600">⏰ Token expired: ${new Date(payload.exp * 1000).toLocaleString()}</div>`);
+                        }
+                    } else {
+                        status.push(`<div class="text-red-600">❌ Invalid token format</div>`);
+                    }
+                } catch (error) {
+                    status.push(`<div class="text-red-600">❌ Token decode error: ${error.message}</div>`);
+                }
+            } else {
+                status.push(`<div class="text-red-600">❌ No token found</div>`);
+            }
+            
+            if (adminInfo) {
+                try {
+                    const admin = JSON.parse(adminInfo);
+                    status.push(`<div class="text-green-600">✅ Admin info: ${admin.email} (${admin.role})</div>`);
+                } catch (error) {
+                    status.push(`<div class="text-red-600">❌ Invalid admin info: ${error.message}</div>`);
+                }
+            } else {
+                status.push(`<div class="text-red-600">❌ No admin info found</div>`);
+            }
+            
+            statusDiv.innerHTML = status.join('');
+        }
+
+        document.getElementById('refreshStatus').addEventListener('click', updateAuthStatus);
+
+        document.getElementById('testLogin').addEventListener('click', async () => {
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing login...';
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store the auth data
+                    localStorage.setItem('admin_token', data.data.token);
+                    localStorage.setItem('admin_info', JSON.stringify(data.data.user));
+                    
+                    resultDiv.innerHTML = `
+                        <div class="text-green-600">✅ Login successful!</div>
+                        <div class="text-gray-600 mt-2">User: ${data.data.user.name}</div>
+                        <div class="text-gray-600">Role: ${data.data.user.role}</div>
+                        <div class="text-gray-600">Token: ${data.data.token.substring(0, 30)}...</div>
+                    `;
+                    
+                    updateAuthStatus();
+                } else {
+                    resultDiv.innerHTML = `<div class="text-red-600">❌ Login failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ Error: ${error.message}</div>`;
+            }
+        });
+
+        document.getElementById('testValidation').addEventListener('click', async () => {
+            const token = localStorage.getItem('admin_token');
+            const resultDiv = document.getElementById('validationResult');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="text-red-600">❌ No token to validate</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing validation...';
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-validate', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="text-green-600">✅ Validation successful!</div>
+                        <div class="text-gray-600 mt-2">Admin: ${data.admin.name}</div>
+                        <div class="text-gray-600">Email: ${data.admin.email}</div>
+                        <div class="text-gray-600">Role: ${data.admin.role}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="text-red-600">❌ Validation failed: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-600">❌ Validation error: ${error.message}</div>`;
+            }
+        });
+
+        document.getElementById('clearAuth').addEventListener('click', () => {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_info');
+            updateAuthStatus();
+            document.getElementById('loginResult').innerHTML = '';
+            document.getElementById('validationResult').innerHTML = '';
+        });
+
+        // Initialize
+        updateAuthStatus();
+    </script>
+</body>
+</html>

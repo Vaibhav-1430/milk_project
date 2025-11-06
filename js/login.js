@@ -24,6 +24,7 @@ class LoginManager {
     this.bindEvents();
     this.setupValidation();
     this.setupTabs();
+    this.checkForLoginMessage();
   }
 
   // Detect backend base URL (works for local + Netlify)
@@ -408,6 +409,15 @@ class LoginManager {
     const alertElement = document.getElementById("alertMessage");
     if (alertElement) {
       alertElement.style.display = "none";
+    }
+  }
+
+  // Check for login message from redirect
+  checkForLoginMessage() {
+    const message = sessionStorage.getItem('loginMessage');
+    if (message) {
+      this.showAlert(message, 'info');
+      sessionStorage.removeItem('loginMessage');
     }
   }
 
