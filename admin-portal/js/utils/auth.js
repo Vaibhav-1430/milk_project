@@ -132,7 +132,8 @@ class AuthManager {
         if (message) {
             sessionStorage.setItem('loginMessage', message);
         }
-        window.location.href = '/login.html';
+        // Use relative path to ensure it works in all environments
+        window.location.href = 'login.html';
     }
 
     /**

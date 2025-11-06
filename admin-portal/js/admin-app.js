@@ -25,9 +25,14 @@ class AdminApp {
             // Show loading screen
             this.showLoading();
 
+            console.log('Initializing admin portal...');
+
             // Initialize authentication
             const isAuthenticated = await authManager.initialize();
+            console.log('Authentication result:', isAuthenticated);
+            
             if (!isAuthenticated) {
+                console.log('Not authenticated, should redirect to login');
                 return;
             }
 
@@ -41,6 +46,7 @@ class AdminApp {
             console.log('Admin portal initialized successfully');
         } catch (error) {
             console.error('Failed to initialize admin portal:', error);
+            this.hideLoading();
             this.showError('Failed to initialize application. Please refresh the page.');
         }
     }
@@ -636,6 +642,28 @@ class AdminApp {
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const app = new AdminApp();
+    
+    // Check if we're in demo mode (URL parameter)
+    const urlParams = new URLSearchParams(window.location.search);
+    const demoMode = urlParams.get('demo') === 'true';
+    
+    if (demoMode) {
+        // Set up demo authentication
+        const mockToken = 'demo-admin-token-' + Date.now();
+        const mockAdmin = {
+            id: 'admin1',
+            name: 'Demo Admin',
+            email: 'admin@garamdoodh.com',
+            role: 'admin',
+            permissions: ['view_dashboard', 'manage_orders', 'manage_products', 'manage_customers', 'view_analytics', 'manage_settings']
+        };
+        
+        localStorage.setItem('admin_token', mockToken);
+        localStorage.setItem('admin_info', JSON.stringify(mockAdmin));
+        
+        console.log('Demo mode activated');
+    }
+    
     app.initialize();
 });
 
