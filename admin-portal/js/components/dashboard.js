@@ -162,100 +162,149 @@ export class Dashboard {
     }
 
     /**
-     * Load dashboard metrics
+     * Load dashboard data from API
      */
     async loadMetrics() {
         try {
-            // For now, using mock data. Replace with actual API call
-            const mockMetrics = {
-                todayOrders: 24,
-                todayRevenue: 4800,
-                totalCustomers: 156,
-                pendingOrders: 8,
-                weeklyRevenue: 28500,
-                monthlyRevenue: 125000,
-                lowStockCount: 3,
-                failedPayments: 2,
-                ordersChange: 12.5,
-                revenueChange: 8.3,
-                customersChange: 5.2
-            };
-
-            this.metrics = mockMetrics;
-            this.renderMetrics();
+            // Import API client dynamically
+            const { adminAPI } = await import('../api/admin-api.js');
+            
+            // Fetch real dashboard data
+            const response = await adminAPI.getDashboardData();
+            
+            if (response.success) {
+                this.metrics = response.data.metrics;
+                this.renderMetrics();
+            } else {
+                throw new Error(response.message || 'Failed to load metrics');
+            }
         } catch (error) {
             console.error('Failed to load metrics:', error);
+            // Fallback to demo data if API fails
+            this.loadDemoMetrics();
         }
     }
 
     /**
-     * Load recent orders
+     * Load recent orders from API
      */
     async loadRecentOrders() {
         try {
-            // Mock data - replace with actual API call
-            const mockOrders = [
-                {
-                    id: 'GD000123',
-                    customer: 'John Doe',
-                    amount: 250,
-                    status: 'confirmed',
-                    createdAt: new Date(Date.now() - 30 * 60 * 1000)
-                },
-                {
-                    id: 'GD000124',
-                    customer: 'Jane Smith',
-                    amount: 180,
-                    status: 'pending',
-                    createdAt: new Date(Date.now() - 45 * 60 * 1000)
-                },
-                {
-                    id: 'GD000125',
-                    customer: 'Mike Johnson',
-                    amount: 320,
-                    status: 'delivered',
-                    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-                }
-            ];
-
-            this.recentOrders = mockOrders;
-            this.renderRecentOrders();
+            // Import API client dynamically
+            const { adminAPI } = await import('../api/admin-api.js');
+            
+            // Fetch real dashboard data (includes recent orders)
+            const response = await adminAPI.getDashboardData();
+            
+            if (response.success && response.data.recentOrders) {
+                this.recentOrders = response.data.recentOrders;
+                this.renderRecentOrders();
+            } else {
+                throw new Error('No recent orders data');
+            }
         } catch (error) {
             console.error('Failed to load recent orders:', error);
+            // Fallback to demo data if API fails
+            this.loadDemoOrders();
         }
     }
 
     /**
-     * Load alerts
+     * Load alerts from API
      */
     async loadAlerts() {
         try {
-            // Mock alerts - replace with actual API call
-            const mockAlerts = [
-                {
-                    type: 'warning',
-                    title: 'Low Stock Alert',
-                    message: 'Milk 1L is running low (5 units remaining)',
-                    time: new Date(Date.now() - 15 * 60 * 1000)
-                },
-                {
-                    type: 'error',
-                    title: 'Payment Failed',
-                    message: '2 payments failed in the last hour',
-                    time: new Date(Date.now() - 30 * 60 * 1000)
-                },
-                {
-                    type: 'info',
-                    title: 'New Customer',
-                    message: '3 new customers registered today',
-                    time: new Date(Date.now() - 60 * 60 * 1000)
-                }
-            ];
-
-            this.renderAlerts(mockAlerts);
+            // Import API client dynamically
+            const { adminAPI } = await import('../api/admin-api.js');
+            
+            // Fetch real dashboard data (includes alerts)
+            const response = await adminAPI.getDashboardData();
+            
+            if (response.success && response.data.alerts) {
+                this.renderAlerts(response.data.alerts);
+            } else {
+                // No alerts or failed to load
+                this.renderAlerts([]);
+            }
         } catch (error) {
             console.error('Failed to load alerts:', error);
+            // Fallback to demo alerts if API fails
+            this.loadDemoAlerts();
         }
+    }
+
+    /**
+     * Fallback demo metrics
+     */
+    loadDemoMetrics() {
+        console.log('📊 Loading demo metrics as fallback');
+        this.metrics = {
+            todayOrders: 24,
+            todayRevenue: 4800,
+            totalCustomers: 156,
+            pendingOrders: 8,
+            weeklyRevenue: 28500,
+            monthlyRevenue: 125000,
+            lowStockCount: 3,
+            failedPayments: 2,
+            ordersChange: 12.5,
+            revenueChange: 8.3,
+            customersChange: 5.2
+        };
+        this.renderMetrics();
+    }
+
+    /**
+     * Fallback demo orders
+     */
+    loadDemoOrders() {
+        console.log('📋 Loading demo orders as fallback');
+        this.recentOrders = [
+            {
+                id: 'GD000123',
+                customer: 'John Doe',
+                amount: 250,
+                status: 'confirmed',
+                createdAt: new Date(Date.now() - 30 * 60 * 1000)
+            },
+            {
+                id: 'GD000124',
+                customer: 'Jane Smith',
+                amount: 180,
+                status: 'pending',
+                createdAt: new Date(Date.now() - 45 * 60 * 1000)
+            },
+            {
+                id: 'GD000125',
+                customer: 'Mike Johnson',
+                amount: 320,
+                status: 'delivered',
+                createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
+            }
+        ];
+        this.renderRecentOrders();
+    }
+
+    /**
+     * Fallback demo alerts
+     */
+    loadDemoAlerts() {
+        console.log('🚨 Loading demo alerts as fallback');
+        const demoAlerts = [
+            {
+                type: 'warning',
+                title: 'Demo Mode',
+                message: 'Admin portal is running in demo mode with sample data',
+                time: new Date()
+            },
+            {
+                type: 'info',
+                title: 'Database Connection',
+                message: 'Connect to database to see real-time data',
+                time: new Date(Date.now() - 5 * 60 * 1000)
+            }
+        ];
+        this.renderAlerts(demoAlerts);
     }
 
     /**
