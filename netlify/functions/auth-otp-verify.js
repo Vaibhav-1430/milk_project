@@ -71,10 +71,18 @@ exports.handler = async (event) => {
             delete userResponse.password;
         }
         
+        // Add admin flag for frontend detection
+        const isAdmin = user.role === 'admin';
+        console.log('🔐 Is admin user:', isAdmin);
+        
         return json({ 
             success: true, 
-            message: 'OTP verification successful', 
-            data: { user: userResponse, token } 
+            message: isAdmin ? 'Admin OTP verification successful' : 'OTP verification successful',
+            data: { 
+                user: userResponse, 
+                token,
+                isAdmin 
+            } 
         });
     } catch (error) {
         console.error('💥 OTP verification error:', error);

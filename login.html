@@ -42,6 +42,31 @@
             font-size: 0.9rem;
         }
         
+        .login-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #F3F4F6;
+            border-radius: 12px;
+            padding: 4px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #4F46E5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
         .form-group {
             margin-bottom: 20px;
             text-align: left;
@@ -116,6 +141,10 @@
             transform: none;
         }
         
+        .login-btn.secondary {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        
         .remember-forgot {
             display: flex;
             justify-content: space-between;
@@ -175,6 +204,12 @@
             border: 1px solid #FECACA;
         }
         
+        .alert-info {
+            background: #DBEAFE;
+            color: #1E40AF;
+            border: 1px solid #93C5FD;
+        }
+        
         .loading-spinner {
             display: inline-block;
             width: 16px;
@@ -190,14 +225,31 @@
             to { transform: rotate(360deg); }
         }
         
-        .admin-badge {
-            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
+        .otp-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .otp-timer {
+            color: #6B7280;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .resend-link {
+            color: #4F46E5;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .resend-link:hover {
+            color: #3730A3;
         }
     </style>
 </head>
@@ -209,9 +261,16 @@
                 <p>Fresh Boiled Milk Delivered to Your Doorstep</p>
             </div>
 
+            <!-- Login Method Tabs -->
+            <div class="login-tabs">
+                <button type="button" class="tab-btn active" id="passwordTab">Password</button>
+                <button type="button" class="tab-btn" id="otpTab">OTP Login</button>
+            </div>
+
             <!-- Alert Messages -->
             <div id="alertMessage" class="alert" style="display: none;"></div>
 
+            <!-- Password Login Form -->
             <form id="passwordLoginForm">
                 <div class="form-group">
                     <label for="email">Email Address</label>
@@ -250,9 +309,53 @@
                     <a href="#" class="forgot-password">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="login-btn" id="loginBtn">
-                    <span id="loginBtnText">Sign In</span>
+                <button type="submit" class="login-btn" id="passwordLoginBtn">
+                    <span id="passwordLoginBtnText">Sign In</span>
                 </button>
+            </form>
+
+            <!-- OTP Login Form -->
+            <form id="otpLoginForm" class="hidden">
+                <div class="form-group">
+                    <label for="otpEmail">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="otpEmail" 
+                        name="otpEmail" 
+                        class="form-input" 
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <button type="button" class="login-btn secondary" id="sendOtpBtn">
+                    <span id="sendOtpBtnText">Send OTP</span>
+                </button>
+
+                <!-- OTP Verification Section -->
+                <div id="otpVerificationSection" class="hidden">
+                    <div class="form-group" style="margin-top: 30px;">
+                        <label for="otpCode">Enter OTP</label>
+                        <input 
+                            type="text" 
+                            id="otpCode" 
+                            name="otpCode" 
+                            class="form-input otp-input" 
+                            placeholder="000000"
+                            maxlength="6"
+                            pattern="[0-9]{6}"
+                        >
+                        <div class="otp-timer" id="otpTimer"></div>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="verifyOtpBtn">
+                        <span id="verifyOtpBtnText">Verify OTP</span>
+                    </button>
+
+                    <div style="text-align: center; margin-top: 15px;">
+                        <span class="resend-link hidden" id="resendOtpLink">Resend OTP</span>
+                    </div>
+                </div>
             </form>
 
             <div class="signup-link">
