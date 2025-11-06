@@ -2,8 +2,8 @@
 
 export const CONFIG = {
     // API Configuration
-    API_BASE_URL: '/.netlify/functions/api',
-    API_ADMIN_URL: '/.netlify/functions/api/admin',
+    API_BASE_URL: '/.netlify/functions',
+    API_ADMIN_URL: '/.netlify/functions',
     
     // Authentication
     TOKEN_KEY: 'admin_token',

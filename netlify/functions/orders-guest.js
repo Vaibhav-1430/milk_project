@@ -1,8 +1,8 @@
-const { MongoClient } = require("mongodb");
+const { connectToDatabase } = require('../../db');
+const Order = require('../../models/Order');
+const User = require('../../models/User');
+const Product = require('../../models/Product');
 const { sendNewOrderEmail } = require('../../utils/mailer');
-
-const uri = process.env.MONGODB_URI;
-let client = null;
 
 // Server-side coupon validation
 async function validateCouponOnServer(couponCode, orderAmount) {
@@ -81,12 +81,27 @@ async function validateCouponOnServer(couponCode, orderAmount) {
   };
 }
 
-async function connectDB() {
-  if (!client) {
-    client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    await client.connect();
+// Helper function to find or create user
+async function findOrCreateUser(contactInfo, customerType, hostel) {
+  let user = await User.findOne({ email: contactInfo.email });
+  
+  if (!user) {
+    // Create new user with a temporary password for guest orders
+    user = new User({
+      name: contactInfo.name,
+      email: contactInfo.email,
+      phone: contactInfo.phone,
+      password: 'guest_temp_password_' + Date.now(), // Temporary password for guest users
+      role: 'customer',
+      customerType: customerType,
+      hostel: customerType === 'college' ? hostel : undefined,
+      isActive: true
+    });
+    await user.save();
+    console.log('✅ New guest user created:', user.email);
   }
-  return client.db("garamdoodh"); // you can replace with your DB name
+  
+  return user;
 }
 
 exports.handler = async (event) => {
@@ -107,9 +122,13 @@ exports.handler = async (event) => {
   }
 
   try {
+    console.log('📋 Processing guest order...');
+    await connectToDatabase();
+    
     const body = JSON.parse(event.body || '{}');
-    const { items, customerType, hostel, address, contactInfo, payment, notes, coupon } = body;
+    const { items, customerType, hostel, address, contactInfo, payment, notes, coupon, deliveryDate, deliveryTime } = body;
 
+    // Validation
     if (!Array.isArray(items) || items.length === 0)
       return response(400, { success: false, message: 'At least one item is required' });
     if (!['college', 'outsider'].includes(customerType || ''))
@@ -121,67 +140,106 @@ exports.handler = async (event) => {
     if (!payment || !['cod', 'online'].includes(payment.method || ''))
       return response(400, { success: false, message: 'Payment method must be cod or online' });
 
+    // Find or create user
+    const user = await findOrCreateUser(contactInfo, customerType, hostel);
+
+    // Find products for the order items
+    const orderItems = [];
+    for (const item of items) {
+      // Try to find product by name and quantity
+      let product = await Product.findOne({ 
+        name: { $regex: new RegExp(item.name, 'i') },
+        isAvailable: true 
+      });
+      
+      // If no product found, create a generic product reference
+      if (!product) {
+        console.log(`⚠️ Product not found for: ${item.name}, using generic product`);
+        // Find any available product as fallback
+        product = await Product.findOne({ isAvailable: true });
+        
+        if (!product) {
+          throw new Error(`No products available in database`);
+        }
+      }
+      
+      orderItems.push({
+        product: product._id,
+        name: item.name,
+        quantity: Number(item.quantity),
+        price: Number(item.price),
+        total: Number(item.price) * Number(item.quantity)
+      });
+    }
+
     const subtotal = items.reduce((sum, i) => sum + Number(i.price) * Number(i.quantity), 0);
     const deliveryFee = subtotal >= 100 ? 0 : 30;
     
     // Calculate coupon discount
     let couponDiscount = 0;
-    let couponData = null;
     if (coupon && coupon.code) {
-      // Validate coupon again on server side
       const couponValidation = await validateCouponOnServer(coupon.code, subtotal);
       if (couponValidation.valid) {
         couponDiscount = couponValidation.discountAmount;
-        couponData = {
-          code: coupon.code,
-          type: coupon.type,
-          discount: couponDiscount,
-          description: couponValidation.description
-        };
       }
     }
     
     const total = subtotal + deliveryFee - couponDiscount;
 
-    const now = Date.now();
-    const order = {
-      orderNumber: `GD${String(now).slice(-6)}`,
-      status: 'pending',
-      items: items.map(i => ({
-        name: i.name,
-        quantity: Number(i.quantity),
-        price: Number(i.price),
-        total: Number(i.price) * Number(i.quantity)
-      })),
+    // Create order using Mongoose model
+    const order = new Order({
+      user: user._id,
+      items: orderItems,
       customerType,
       hostel: customerType === 'college' ? hostel : undefined,
-      deliveryAddress: { street: address, city: '', state: '', pincode: '' },
+      deliveryAddress: {
+        street: address,
+        city: 'Default City',
+        state: 'Default State',
+        pincode: '000000'
+      },
       contactInfo,
-      pricing: { subtotal, deliveryFee, couponDiscount, total },
-      payment: { method: payment.method, status: 'pending' },
-      coupon: couponData,
-      deliveryDate: new Date(),
-      deliveryTime: 'morning',
+      pricing: { 
+        subtotal, 
+        deliveryFee, 
+        total 
+      },
+      payment: { 
+        method: payment.method, 
+        status: payment.method === 'cod' ? 'pending' : 'paid',
+        razorpayOrderId: payment.razorpayOrderId,
+        razorpayPaymentId: payment.razorpayPaymentId,
+        razorpaySignature: payment.razorpaySignature
+      },
+      status: 'pending',
+      deliveryDate: deliveryDate ? new Date(deliveryDate) : new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      deliveryTime: deliveryTime || 'morning',
       notes
-    };
+    });
 
-    // ✅ Save order in MongoDB
-    const db = await connectDB();
-    await db.collection("orders").insertOne(order);
+    // Save order to database
+    await order.save();
+    console.log('✅ Order saved to database:', order.orderNumber);
 
     // Fire-and-forget email
     setTimeout(() => {
-      Promise.resolve(sendNewOrderEmail(order)).catch(() => {});
+      Promise.resolve(sendNewOrderEmail(order)).catch((err) => {
+        console.error('Email sending failed:', err);
+      });
     }, 10);
 
     return response(201, {
       success: true,
       message: 'Order received & saved to DB ✅',
-      data: { orderNumber: order.orderNumber, pricing: order.pricing }
+      data: { 
+        orderNumber: order.orderNumber, 
+        pricing: order.pricing,
+        orderId: order._id
+      }
     });
   } catch (err) {
-    console.error("Order error:", err);
-    return response(500, { success: false, message: 'Server error while creating guest order' });
+    console.error("💥 Order creation error:", err);
+    return response(500, { success: false, message: 'Server error while creating guest order', error: err.message });
   }
 };
 

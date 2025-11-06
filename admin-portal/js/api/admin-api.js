@@ -52,13 +52,13 @@ class AdminAPI {
 
     // Dashboard APIs
     async getDashboardData() {
-        return this.request('/dashboard');
+        return this.request('/admin-dashboard');
     }
 
     // Order APIs
     async getOrders(params = {}) {
         const queryString = new URLSearchParams(params).toString();
-        return this.request(`/orders${queryString ? `?${queryString}` : ''}`);
+        return this.request(`/admin-orders${queryString ? `?${queryString}` : ''}`);
     }
 
     async getOrder(orderId) {
@@ -82,7 +82,7 @@ class AdminAPI {
     // Product APIs
     async getProducts(params = {}) {
         const queryString = new URLSearchParams(params).toString();
-        return this.request(`/products${queryString ? `?${queryString}` : ''}`);
+        return this.request(`/admin-products${queryString ? `?${queryString}` : ''}`);
     }
 
     async getProduct(productId) {
@@ -112,11 +112,11 @@ class AdminAPI {
     // Customer APIs
     async getCustomers(params = {}) {
         const queryString = new URLSearchParams(params).toString();
-        return this.request(`/customers${queryString ? `?${queryString}` : ''}`);
+        return this.request(`/admin-customers${queryString ? `?${queryString}` : ''}`);
     }
 
     async getCustomer(customerId) {
-        return this.request(`/customers?customerId=${customerId}`);
+        return this.request(`/admin-customers?customerId=${customerId}`);
     }
 
     async updateCustomer(customerId, updates) {

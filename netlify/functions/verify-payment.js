@@ -22,12 +22,16 @@ exports.handler = async (event) => {
     }
 
     // ✅ Payment verified → now save order in DB
-    const res = await fetch(`${process.env.API_URL}/api/orders-guest`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const { handler: saveOrderHandler } = require('./orders-guest');
+    
+    const saveOrderEvent = {
+      httpMethod: 'POST',
       body: JSON.stringify(orderData),
-    });
-    const savedOrder = await res.json();
+      headers: { 'Content-Type': 'application/json' }
+    };
+    
+    const saveOrderResult = await saveOrderHandler(saveOrderEvent);
+    const savedOrder = JSON.parse(saveOrderResult.body);
 
     return {
       statusCode: 200,
