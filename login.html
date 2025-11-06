@@ -1,318 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - GaramDoodh</title>
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%);
-      min-height: 100vh;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
-      transition: all 0.2s ease;
-    }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #3730a3, #4f46e5);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
-    }
-    .notification {
-      animation: fadeInOut 3s ease-in-out;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateX(100%); }
-      10%, 90% { opacity: 1; transform: translateX(0); }
-      100% { opacity: 0; transform: translateX(100%); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-
-<body class="flex items-center justify-center p-4">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-    <!-- Logo -->
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-400 rounded-full mx-auto flex items-center justify-center">
-        <img src="images/garam-doodh-logo.png" alt="Logo" class="w-10 h-10" />
-      </div>
-      <h1 class="text-2xl font-bold text-gray-900 mt-4">Welcome Back</h1>
-      <p class="text-gray-500 text-sm">Sign in to your GaramDoodh account</p>
-    </div>
-
-    <!-- Tabs -->
-    <div class="flex border-b border-gray-200 mb-6">
-      <button id="passwordTab" class="flex-1 py-2 font-medium text-indigo-600 border-b-2 border-indigo-500">
-        <i class="fas fa-lock mr-2"></i>Password
-      </button>
-      <button id="otpTab" class="flex-1 py-2 font-medium text-gray-500 border-b-2 border-transparent hover:text-indigo-600">
-        <i class="fas fa-key mr-2"></i>OTP Login
-      </button>
-    </div>
-
-    <!-- PASSWORD LOGIN FORM -->
-    <form id="passwordForm" class="space-y-5">
-      <div>
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-          required
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-          required
-        />
-      </div>
-      <div class="flex items-center justify-between text-sm">
-        <label class="flex items-center">
-          <input type="checkbox" class="mr-2 text-indigo-600" /> Remember me
-        </label>
-        <a href="#" class="text-indigo-600 hover:text-indigo-800">Forgot password?</a>
-      </div>
-      <button
-        type="submit"
-        id="signInBtn"
-        class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
-      >
-        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
-      </button>
-    </form>
-
-    <!-- OTP LOGIN FORM -->
-    <form id="otpForm" class="space-y-5 hidden">
-      <div>
-        <input
-          type="email"
-          id="otpEmail"
-          placeholder="Enter your email"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-          required
-        />
-      </div>
-      <button
-        type="button"
-        id="sendOtpBtn"
-        class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
-      >
-        <i class="fas fa-paper-plane mr-2"></i>Send OTP
-      </button>
-
-      <div id="otpInputContainer" class="hidden space-y-3">
-        <input
-          type="text"
-          id="otpCode"
-          maxlength="6"
-          placeholder="Enter 6-digit OTP"
-          class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
-        />
-        <div class="text-center text-sm text-gray-500">
-          <span id="otpTimer">OTP expires in: 5:00</span>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full space-y-8 p-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-indigo-600 mb-2">GaramDoodh</h1>
+            <h2 class="text-xl font-semibold text-gray-900">Admin Portal</h2>
+            <p class="text-gray-600 mt-2">Sign in to manage your milk delivery business</p>
         </div>
-        <button
-          type="submit"
-          id="verifyOtpBtn"
-          class="btn-primary w-full py-3 text-white rounded-lg font-semibold shadow"
-        >
-          <i class="fas fa-check-circle mr-2"></i>Verify & Login
-        </button>
-        <button
-          type="button"
-          id="resendOtpBtn"
-          class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mx-auto block"
-          disabled
-        >
-          Resend OTP
-        </button>
-      </div>
-    </form>
 
-    <div class="text-center mt-8 text-sm text-gray-600">
-      Don't have an account?
-      <a href="signup.html" class="text-indigo-600 hover:text-indigo-800 font-semibold">Sign up here</a>
+        <!-- Login Message -->
+        <div id="loginMessage" class="hidden p-4 rounded-lg"></div>
+
+        <form id="loginForm" class="mt-8 space-y-6">
+            <div class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input 
+                        id="email" 
+                        name="email" 
+                        type="email" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="admin@garamdoodh.com"
+                    >
+                    <div class="text-red-600 text-sm mt-1 hidden" data-error-for="email"></div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="relative mt-1">
+                        <input 
+                            id="password" 
+                            name="password" 
+                            type="password" 
+                            required 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                            placeholder="Enter your password"
+                        >
+                        <button 
+                            type="button" 
+                            id="togglePassword" 
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                            <i class="fas fa-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
+                    <div class="text-red-600 text-sm mt-1 hidden" data-error-for="password"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input 
+                        id="remember" 
+                        name="remember" 
+                        type="checkbox" 
+                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    >
+                    <label for="remember" class="ml-2 block text-sm text-gray-700">
+                        Remember me
+                    </label>
+                </div>
+
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Forgot password?
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <button 
+                    type="submit" 
+                    id="loginBtn"
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-sign-in-alt text-indigo-500 group-hover:text-indigo-400"></i>
+                    </span>
+                    <span id="loginBtnText">Sign In</span>
+                    <i class="fas fa-spinner fa-spin ml-2 hidden" id="loginSpinner"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 class="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h3>
+            <p class="text-sm text-blue-700">
+                <strong>Email:</strong> admin@garamdoodh.com<br>
+                <strong>Password:</strong> admin123
+            </p>
+            <button 
+                id="useDemoBtn" 
+                class="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+                Use Demo Credentials
+            </button>
+        </div>
     </div>
 
-    <div class="text-center mt-3">
-      <a href="index.html" class="text-gray-500 hover:text-indigo-600 text-sm">
-        <i class="fas fa-arrow-left mr-1"></i> Back to Home
-      </a>
-    </div>
-  </div>
+    <script>
+        // Login form handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loginSpinner = document.getElementById('loginSpinner');
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            const useDemoBtn = document.getElementById('useDemoBtn');
+            const loginMessage = document.getElementById('loginMessage');
 
-  <!-- JavaScript -->
-  <script>
-    // Notification
-    function notify(msg, type = "info") {
-      const div = document.createElement("div");
-      div.className = `notification fixed top-4 right-4 px-5 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
-        type === "success"
-          ? "bg-green-500"
-          : type === "error"
-          ? "bg-red-500"
-          : "bg-indigo-600"
-      }`;
-      div.textContent = msg;
-      document.body.appendChild(div);
-      setTimeout(() => div.remove(), 3000);
-    }
+            // Show login message if exists
+            const message = sessionStorage.getItem('loginMessage');
+            if (message) {
+                showMessage(message, 'error');
+                sessionStorage.removeItem('loginMessage');
+            }
 
-    // Toggle Tabs
-    const passwordTab = document.getElementById("passwordTab");
-    const otpTab = document.getElementById("otpTab");
-    const passwordForm = document.getElementById("passwordForm");
-    const otpForm = document.getElementById("otpForm");
+            // Toggle password visibility
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                passwordIcon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
 
-    passwordTab.addEventListener("click", () => {
-      passwordTab.classList.add("text-indigo-600", "border-indigo-500");
-      otpTab.classList.remove("text-indigo-600", "border-indigo-500");
-      passwordForm.classList.remove("hidden");
-      otpForm.classList.add("hidden");
-    });
+            // Use demo credentials
+            useDemoBtn.addEventListener('click', function() {
+                document.getElementById('email').value = 'admin@garamdoodh.com';
+                document.getElementById('password').value = 'admin123';
+            });
 
-    otpTab.addEventListener("click", () => {
-      otpTab.classList.add("text-indigo-600", "border-indigo-500");
-      passwordTab.classList.remove("text-indigo-600", "border-indigo-500");
-      otpForm.classList.remove("hidden");
-      passwordForm.classList.add("hidden");
-    });
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-    // Password Login
-    document.getElementById("passwordForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const btn = document.getElementById("signInBtn");
+                // Show loading state
+                setLoading(true);
 
-      if (!email || !password) return notify("Please fill in all fields", "error");
+                try {
+                    // For demo purposes, accept demo credentials
+                    if (email === 'admin@garamdoodh.com' && password === 'admin123') {
+                        // Create mock token and admin info
+                        const mockToken = 'demo-admin-token-' + Date.now();
+                        const mockAdmin = {
+                            id: 'admin1',
+                            name: 'Admin User',
+                            email: 'admin@garamdoodh.com',
+                            role: 'admin',
+                            permissions: ['view_dashboard', 'manage_orders', 'manage_products', 'manage_customers', 'view_analytics', 'manage_settings']
+                        };
 
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+                        // Store in localStorage (in real app, this would be handled by auth manager)
+                        localStorage.setItem('admin_token', mockToken);
+                        localStorage.setItem('admin_info', JSON.stringify(mockAdmin));
 
-      try {
-        const res = await fetch("/.netlify/functions/auth-login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+                        showMessage('Login successful! Redirecting...', 'success');
+                        
+                        // Redirect to admin portal
+                        setTimeout(() => {
+                            window.location.href = '/admin.html';
+                        }, 1000);
+                    } else {
+                        throw new Error('Invalid credentials. Please use the demo credentials.');
+                    }
+                } catch (error) {
+                    showMessage(error.message || 'Login failed. Please try again.', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            function setLoading(loading) {
+                loginBtn.disabled = loading;
+                loginBtnText.textContent = loading ? 'Signing In...' : 'Sign In';
+                loginSpinner.classList.toggle('hidden', !loading);
+            }
+
+            function showMessage(message, type) {
+                loginMessage.className = `p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+                loginMessage.textContent = message;
+                loginMessage.classList.remove('hidden');
+            }
         });
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
-          localStorage.setItem("garamdoodh_token", data.data.token);
-          notify("Login successful! Redirecting...", "success");
-          setTimeout(() => (window.location.href = "index.html"), 1500);
-        } else notify(data.message || "Login failed", "error");
-      } catch {
-        notify("Network error. Please try again.", "error");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Sign In';
-      }
-    });
-
-    // OTP Send
-    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
-      const email = document.getElementById("otpEmail").value.trim();
-      if (!email) return notify("Enter your email", "error");
-      notify("Sending OTP...", "info");
-
-      try {
-        const res = await fetch("/.netlify/functions/auth-otp-generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          notify("OTP sent! Check your email.", "success");
-          document.getElementById("otpInputContainer").classList.remove("hidden");
-          startOtpTimer();
-        } else notify("Failed to send OTP", "error");
-      } catch {
-        notify("Network error. Try again.", "error");
-      }
-    });
-
-    // OTP Verify
-    document.getElementById("otpForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("otpEmail").value.trim();
-      const otp = document.getElementById("otpCode").value.trim();
-      const btn = document.getElementById("verifyOtpBtn");
-
-      if (!otp) return notify("Enter your OTP", "error");
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verifying...';
-
-      try {
-        const res = await fetch("/.netlify/functions/auth-otp-verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp }),
-        });
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          localStorage.setItem("garamdoodh_user", JSON.stringify(data.data.user));
-          localStorage.setItem("garamdoodh_token", data.data.token);
-          notify("Login successful!", "success");
-          setTimeout(() => (window.location.href = "index.html"), 1500);
-        } else notify(data.message || "Invalid OTP", "error");
-      } catch {
-        notify("Network error", "error");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Verify & Login';
-      }
-    });
-
-    // OTP Timer
-    let otpTimer;
-    function startOtpTimer() {
-      clearInterval(otpTimer);
-      let timeLeft = 5 * 60;
-      const timerEl = document.getElementById("otpTimer");
-      const resendBtn = document.getElementById("resendOtpBtn");
-      resendBtn.disabled = true;
-
-      otpTimer = setInterval(() => {
-        timeLeft--;
-        const m = Math.floor(timeLeft / 60);
-        const s = String(timeLeft % 60).padStart(2, "0");
-        timerEl.textContent = `OTP expires in: ${m}:${s}`;
-
-        if (timeLeft <= 0) {
-          clearInterval(otpTimer);
-          timerEl.textContent = "OTP expired";
-          resendBtn.disabled = false;
-        }
-      }, 1000);
-    }
-
-    document.getElementById("resendOtpBtn").addEventListener("click", () => {
-      document.getElementById("sendOtpBtn").click();
-    });
-  </script>
+    </script>
 </body>
 </html>
