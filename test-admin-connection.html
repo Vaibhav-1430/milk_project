@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Connection - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-600 mb-2">Admin Portal Connection Test</h1>
+            <p class="text-gray-600">Test your real-time admin portal database connection</p>
+        </div>
+
+        <!-- Test Results -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Database Connection Test -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-database mr-2 text-blue-500"></i>
+                    Database Connection
+                </h3>
+                <button id="testDbBtn" class="btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4">
+                    Test Database
+                </button>
+                <div id="dbResult" class="text-sm"></div>
+            </div>
+
+            <!-- Admin User Test -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-user-shield mr-2 text-green-500"></i>
+                    Admin User Setup
+                </h3>
+                <button id="testAdminBtn" class="btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4">
+                    Create/Check Admin
+                </button>
+                <div id="adminResult" class="text-sm"></div>
+            </div>
+
+            <!-- Orders Count Test -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-shopping-cart mr-2 text-purple-500"></i>
+                    Orders Data
+                </h3>
+                <button id="testOrdersBtn" class="btn bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mb-4">
+                    Count Orders
+                </button>
+                <div id="ordersResult" class="text-sm"></div>
+            </div>
+
+            <!-- Dashboard API Test -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">
+                    <i class="fas fa-tachometer-alt mr-2 text-orange-500"></i>
+                    Dashboard API
+                </h3>
+                <button id="testDashboardBtn" class="btn bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 mb-4">
+                    Test Dashboard
+                </button>
+                <div id="dashboardResult" class="text-sm"></div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                Instructions
+            </h3>
+            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                <li>First, test the database connection to ensure MongoDB Atlas is accessible</li>
+                <li>Create/verify the admin user exists in your database</li>
+                <li>Check if you have any orders in your database</li>
+                <li>Test the dashboard API with admin authentication</li>
+                <li>If all tests pass, your admin portal should work with real data</li>
+            </ol>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="text-center mt-8 space-x-4">
+            <a href="setup-admin.html" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
+                Setup Admin User
+            </a>
+            <a href="login.html" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                Login to Admin Portal
+            </a>
+            <a href="admin.html" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700">
+                Direct Admin Access
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Test database connection
+        document.getElementById('testDbBtn').addEventListener('click', async () => {
+            const result = document.getElementById('dbResult');
+            result.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing database connection...';
+            
+            try {
+                const response = await fetch('/.netlify/functions/db-test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> Database connected successfully!</div>
+                                       <div class="text-gray-600 mt-2">MongoDB: ${data.data.database}</div>`;
+                } else {
+                    result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Database connection failed</div>
+                                       <div class="text-gray-600 mt-2">${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Connection error: ${error.message}</div>`;
+            }
+        });
+
+        // Test admin user
+        document.getElementById('testAdminBtn').addEventListener('click', async () => {
+            const result = document.getElementById('adminResult');
+            result.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking admin user...';
+            
+            try {
+                const response = await fetch('/.netlify/functions/create-admin', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> ${data.message}</div>
+                                       <div class="text-gray-600 mt-2">Email: ${data.data.email}</div>
+                                       <div class="text-gray-600">Role: ${data.data.role}</div>
+                                       ${data.data.instructions ? `<div class="text-blue-600 mt-2">${data.data.instructions}</div>` : ''}`;
+                } else {
+                    result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Admin setup failed</div>
+                                       <div class="text-gray-600 mt-2">${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Error: ${error.message}</div>`;
+            }
+        });
+
+        // Test orders count
+        document.getElementById('testOrdersBtn').addEventListener('click', async () => {
+            const result = document.getElementById('ordersResult');
+            result.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Counting orders...';
+            
+            try {
+                // This is a simple test - we'll try to access the orders collection
+                const response = await fetch('/.netlify/functions/db-test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // For now, just show that we can connect. In a real implementation,
+                    // you'd want a specific endpoint to count orders
+                    result.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> Database accessible for orders</div>
+                                       <div class="text-gray-600 mt-2">Ready to fetch real order data</div>
+                                       <div class="text-blue-600 mt-2">Create some orders on your main site to see them in admin portal</div>`;
+                } else {
+                    result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Cannot access orders data</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Error: ${error.message}</div>`;
+            }
+        });
+
+        // Test dashboard API (requires admin login)
+        document.getElementById('testDashboardBtn').addEventListener('click', async () => {
+            const result = document.getElementById('dashboardResult');
+            result.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing dashboard API...';
+            
+            // Check if we have admin token
+            const token = localStorage.getItem('admin_token');
+            
+            if (!token) {
+                result.innerHTML = `<div class="text-yellow-600"><i class="fas fa-exclamation-triangle"></i> No admin token found</div>
+                                   <div class="text-gray-600 mt-2">Please login as admin first</div>
+                                   <div class="mt-2"><a href="login.html" class="text-blue-600 underline">Login Here</a></div>`;
+                return;
+            }
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const metrics = data.data.metrics;
+                    result.innerHTML = `<div class="text-green-600"><i class="fas fa-check"></i> Dashboard API working!</div>
+                                       <div class="text-gray-600 mt-2">
+                                           <div>Today's Orders: ${metrics.todayOrders}</div>
+                                           <div>Total Customers: ${metrics.totalCustomers}</div>
+                                           <div>Today's Revenue: ₹${metrics.todayRevenue}</div>
+                                       </div>`;
+                } else {
+                    result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> Dashboard API failed</div>
+                                       <div class="text-gray-600 mt-2">${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="text-red-600"><i class="fas fa-times"></i> API Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

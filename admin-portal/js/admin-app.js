@@ -770,27 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = new AdminApp();
     globalAdminApp = app; // Store global reference
     
-    // Check if we're in demo mode (URL parameter)
-    const urlParams = new URLSearchParams(window.location.search);
-    const demoMode = urlParams.get('demo') === 'true';
-    
-    if (demoMode) {
-        // Set up demo authentication
-        const mockToken = 'demo-admin-token-' + Date.now();
-        const mockAdmin = {
-            id: 'admin1',
-            name: 'Demo Admin',
-            email: 'admin@garamdoodh.com',
-            role: 'admin',
-            permissions: ['view_dashboard', 'manage_orders', 'manage_products', 'manage_customers', 'view_analytics', 'manage_settings']
-        };
-        
-        localStorage.setItem('admin_token', mockToken);
-        localStorage.setItem('admin_info', JSON.stringify(mockAdmin));
-        
-        console.log('Demo mode activated');
-    }
-    
+    console.log('🚀 Initializing real-time admin portal...');
     app.initialize();
 });
 

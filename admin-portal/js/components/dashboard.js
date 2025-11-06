@@ -169,19 +169,23 @@ export class Dashboard {
             // Import API client dynamically
             const { adminAPI } = await import('../api/admin-api.js');
             
+            console.log('📊 Loading real-time dashboard metrics...');
+            
             // Fetch real dashboard data
             const response = await adminAPI.getDashboardData();
             
             if (response.success) {
                 this.metrics = response.data.metrics;
                 this.renderMetrics();
+                console.log('✅ Real-time metrics loaded successfully');
             } else {
                 throw new Error(response.message || 'Failed to load metrics');
             }
         } catch (error) {
-            console.error('Failed to load metrics:', error);
-            // Fallback to demo data if API fails
-            this.loadDemoMetrics();
+            console.error('❌ Failed to load metrics:', error);
+            this.showError('Failed to load dashboard metrics. Please check your database connection.');
+            // Show empty state instead of demo data
+            this.renderEmptyMetrics();
         }
     }
 
@@ -193,19 +197,25 @@ export class Dashboard {
             // Import API client dynamically
             const { adminAPI } = await import('../api/admin-api.js');
             
+            console.log('📋 Loading real-time recent orders...');
+            
             // Fetch real dashboard data (includes recent orders)
             const response = await adminAPI.getDashboardData();
             
             if (response.success && response.data.recentOrders) {
                 this.recentOrders = response.data.recentOrders;
                 this.renderRecentOrders();
+                console.log('✅ Recent orders loaded successfully:', this.recentOrders.length, 'orders');
             } else {
-                throw new Error('No recent orders data');
+                console.log('ℹ️ No recent orders found');
+                this.recentOrders = [];
+                this.renderRecentOrders();
             }
         } catch (error) {
-            console.error('Failed to load recent orders:', error);
-            // Fallback to demo data if API fails
-            this.loadDemoOrders();
+            console.error('❌ Failed to load recent orders:', error);
+            this.showError('Failed to load recent orders. Please check your database connection.');
+            this.recentOrders = [];
+            this.renderRecentOrders();
         }
     }
 
@@ -217,94 +227,42 @@ export class Dashboard {
             // Import API client dynamically
             const { adminAPI } = await import('../api/admin-api.js');
             
+            console.log('🚨 Loading real-time alerts...');
+            
             // Fetch real dashboard data (includes alerts)
             const response = await adminAPI.getDashboardData();
             
             if (response.success && response.data.alerts) {
                 this.renderAlerts(response.data.alerts);
+                console.log('✅ Alerts loaded successfully:', response.data.alerts.length, 'alerts');
             } else {
-                // No alerts or failed to load
+                console.log('ℹ️ No alerts found');
                 this.renderAlerts([]);
             }
         } catch (error) {
-            console.error('Failed to load alerts:', error);
-            // Fallback to demo alerts if API fails
-            this.loadDemoAlerts();
+            console.error('❌ Failed to load alerts:', error);
+            this.renderAlerts([]);
         }
     }
 
     /**
-     * Fallback demo metrics
+     * Render empty metrics state
      */
-    loadDemoMetrics() {
-        console.log('📊 Loading demo metrics as fallback');
+    renderEmptyMetrics() {
         this.metrics = {
-            todayOrders: 24,
-            todayRevenue: 4800,
-            totalCustomers: 156,
-            pendingOrders: 8,
-            weeklyRevenue: 28500,
-            monthlyRevenue: 125000,
-            lowStockCount: 3,
-            failedPayments: 2,
-            ordersChange: 12.5,
-            revenueChange: 8.3,
-            customersChange: 5.2
+            todayOrders: 0,
+            todayRevenue: 0,
+            totalCustomers: 0,
+            pendingOrders: 0,
+            weeklyRevenue: 0,
+            monthlyRevenue: 0,
+            lowStockCount: 0,
+            failedPayments: 0,
+            ordersChange: 0,
+            revenueChange: 0,
+            customersChange: 0
         };
         this.renderMetrics();
-    }
-
-    /**
-     * Fallback demo orders
-     */
-    loadDemoOrders() {
-        console.log('📋 Loading demo orders as fallback');
-        this.recentOrders = [
-            {
-                id: 'GD000123',
-                customer: 'John Doe',
-                amount: 250,
-                status: 'confirmed',
-                createdAt: new Date(Date.now() - 30 * 60 * 1000)
-            },
-            {
-                id: 'GD000124',
-                customer: 'Jane Smith',
-                amount: 180,
-                status: 'pending',
-                createdAt: new Date(Date.now() - 45 * 60 * 1000)
-            },
-            {
-                id: 'GD000125',
-                customer: 'Mike Johnson',
-                amount: 320,
-                status: 'delivered',
-                createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-            }
-        ];
-        this.renderRecentOrders();
-    }
-
-    /**
-     * Fallback demo alerts
-     */
-    loadDemoAlerts() {
-        console.log('🚨 Loading demo alerts as fallback');
-        const demoAlerts = [
-            {
-                type: 'warning',
-                title: 'Demo Mode',
-                message: 'Admin portal is running in demo mode with sample data',
-                time: new Date()
-            },
-            {
-                type: 'info',
-                title: 'Database Connection',
-                message: 'Connect to database to see real-time data',
-                time: new Date(Date.now() - 5 * 60 * 1000)
-            }
-        ];
-        this.renderAlerts(demoAlerts);
     }
 
     /**

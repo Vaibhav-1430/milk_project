@@ -160,12 +160,6 @@ class LoginManager {
     this.setButtonLoading("passwordLoginBtn", "passwordLoginBtnText", true, "Signing in...");
 
     try {
-      // Check for admin demo credentials first
-      if (email === 'admin@garamdoodh.com' && password === 'admin123') {
-        await this.handleAdminLogin(email, password);
-        return;
-      }
-
       const res = await fetch(`${this.apiBase}/auth-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -300,27 +294,20 @@ class LoginManager {
   }
 
   // Admin login handler
-  async handleAdminLogin(email, password, userData = null) {
+  async handleAdminLogin(email, password, userData) {
     try {
-      this.showAlert("Admin login detected. Redirecting to admin portal...", "success");
+      this.showAlert("Admin login successful! Redirecting to admin portal...", "success");
 
-      // Set up admin authentication
-      const mockToken = 'admin-token-' + Date.now();
-      const adminInfo = userData ? userData.user : {
-        id: 'admin1',
-        name: 'Admin User',
-        email: email,
-        role: 'admin',
-        permissions: ['view_dashboard', 'manage_orders', 'manage_products', 'manage_customers', 'view_analytics', 'manage_settings']
-      };
+      // Set up real admin authentication
+      localStorage.setItem('admin_token', userData.token);
+      localStorage.setItem('admin_info', JSON.stringify(userData.user));
 
-      localStorage.setItem('admin_token', userData ? userData.token : mockToken);
-      localStorage.setItem('admin_info', JSON.stringify(adminInfo));
+      console.log('✅ Admin authenticated:', userData.user.name, userData.user.email);
 
       // Redirect to admin portal
       setTimeout(() => {
         window.location.href = 'admin.html';
-      }, 2000);
+      }, 1500);
     } catch (error) {
       console.error('Admin login error:', error);
       this.showAlert('Admin login failed. Please try again.', 'error');
@@ -341,7 +328,7 @@ class LoginManager {
     document.getElementById("email").value = 'admin@garamdoodh.com';
     document.getElementById("password").value = 'admin123';
     
-    this.showAlert('Admin demo credentials loaded. Click Sign In to continue.', 'info');
+    this.showAlert('Admin credentials loaded. These must exist in your database.', 'info');
   }
 
   // Show OTP verification section

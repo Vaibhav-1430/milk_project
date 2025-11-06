@@ -28,6 +28,11 @@
   status = 200
 
 [[redirects]]
+  from = "/.netlify/functions/api/admin-validate"
+  to = "/.netlify/functions/admin-validate"
+  status = 200
+
+[[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200

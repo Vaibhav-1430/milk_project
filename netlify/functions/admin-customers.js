@@ -5,23 +5,25 @@ const Order = require('../../models/Order');
 const jwt = require('jsonwebtoken');
 
 // Verify admin token
-function verifyAdminToken(authHeader) {
+async function verifyAdminToken(authHeader) {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new Error('No token provided');
     }
     
     const token = authHeader.split(' ')[1];
     
-    // For demo tokens, allow them through
-    if (token.startsWith('admin-token-') || token.startsWith('demo-admin-token-')) {
-        return { userId: 'admin1', role: 'admin' };
-    }
-    
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return decoded;
+        
+        // Verify user exists and is admin
+        const user = await User.findById(decoded.userId);
+        if (!user || user.role !== 'admin') {
+            throw new Error('Access denied - Admin role required');
+        }
+        
+        return { userId: decoded.userId, role: user.role, user };
     } catch (error) {
-        throw new Error('Invalid token');
+        throw new Error('Invalid token or insufficient permissions');
     }
 }
 
@@ -29,7 +31,7 @@ exports.handler = async (event) => {
     try {
         // Verify admin authentication
         const authHeader = event.headers.authorization || event.headers.Authorization;
-        const decoded = verifyAdminToken(authHeader);
+        const decoded = await verifyAdminToken(authHeader);
         
         console.log('🔍 Admin customers request from:', decoded.userId);
         await connectToDatabase();

@@ -226,21 +226,31 @@ class AuthManager {
         }
 
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/auth/validate`, {
+            console.log('🔍 Validating admin session with database...');
+            
+            const response = await fetch(`${CONFIG.API_BASE_URL}/admin-validate`, {
                 headers: this.getAuthHeaders()
             });
 
             if (response.ok) {
                 const data = await response.json();
-                this.adminInfo = data.admin;
-                this.resetSessionTimer();
-                return true;
+                if (data.success) {
+                    this.adminInfo = data.admin;
+                    this.resetSessionTimer();
+                    console.log('✅ Admin session validated:', data.admin.email);
+                    return true;
+                } else {
+                    console.log('❌ Session validation failed:', data.message);
+                    this.clearAuth();
+                    return false;
+                }
             } else {
+                console.log('❌ Session validation request failed:', response.status);
                 this.clearAuth();
                 return false;
             }
         } catch (error) {
-            console.error('Session validation error:', error);
+            console.error('❌ Session validation error:', error);
             this.clearAuth();
             return false;
         }
@@ -263,29 +273,32 @@ class AuthManager {
         // Set up activity listeners to reset session timer
         this.setupActivityListeners();
 
-        // Check for stored admin info (demo mode)
+        // Check for stored admin info
         const storedAdminInfo = localStorage.getItem('admin_info');
         if (storedAdminInfo) {
             try {
                 this.adminInfo = JSON.parse(storedAdminInfo);
             } catch (error) {
                 console.error('Failed to parse stored admin info:', error);
+                this.clearAuth();
+                this.redirectToLogin('Invalid session data. Please login again.');
+                return false;
             }
         }
 
-        // Validate existing session
-        if (this.token) {
-            // For demo mode, just check if token exists and admin info is available
-            if (this.adminInfo) {
+        // Validate existing session with real token validation
+        if (this.token && this.adminInfo) {
+            const isValid = await this.validateSession();
+            if (isValid) {
                 this.startSessionTimer();
                 return true;
             } else {
                 this.clearAuth();
-                this.redirectToLogin();
+                this.redirectToLogin('Session expired. Please login again.');
                 return false;
             }
         } else {
-            this.redirectToLogin();
+            this.redirectToLogin('Please login to access the admin portal.');
             return false;
         }
     }

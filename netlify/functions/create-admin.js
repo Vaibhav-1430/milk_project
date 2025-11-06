@@ -21,17 +21,26 @@ exports.handler = async (event) => {
             // Update existing user to admin role if not already
             if (existingAdmin.role !== 'admin') {
                 existingAdmin.role = 'admin';
+                existingAdmin.isActive = true;
                 await existingAdmin.save();
                 console.log('✅ Updated existing user to admin role');
             }
             
+            // Verify password works (for admin123)
+            const passwordValid = await existingAdmin.comparePassword('admin123');
+            
             return json({
                 success: true,
-                message: 'Admin user already exists',
+                message: 'Admin user already exists and is configured',
                 data: {
                     email: existingAdmin.email,
                     name: existingAdmin.name,
-                    role: existingAdmin.role
+                    role: existingAdmin.role,
+                    isActive: existingAdmin.isActive,
+                    passwordValid: passwordValid,
+                    instructions: passwordValid 
+                        ? 'You can login with admin@garamdoodh.com / admin123'
+                        : 'Admin user exists but password may be different. Use your actual admin password.'
                 }
             });
         }
