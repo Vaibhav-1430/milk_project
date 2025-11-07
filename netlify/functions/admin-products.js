@@ -1,6 +1,7 @@
 const { json, parseBody } = require('./_utils');
 const { connectToDatabase } = require('../../db');
 const Product = require('../../models/Product');
+const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 
 // Verify admin token

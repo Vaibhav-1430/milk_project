@@ -500,9 +500,9 @@ class AdminApp {
                 tbody.innerHTML = orders.map(order => `
                     <tr class="hover:bg-gray-50">
                         <td class="font-medium">${order.orderNumber || order._id}</td>
-                        <td>${order.customer || 'Unknown'}</td>
-                        <td>${order.itemCount || 0} items</td>
-                        <td>₹${order.total || 0}</td>
+                        <td>${order.customer?.name || order.customer || 'Unknown'}</td>
+                        <td>${order.items?.length || 0} items</td>
+                        <td>₹${order.pricing?.total || order.total || 0}</td>
                         <td>
                             <span class="status-badge status-${order.status}">
                                 ${order.status}
@@ -695,6 +695,8 @@ class AdminApp {
                 const tbody = document.getElementById('customersTableBody');
                 if (!tbody) return;
                 
+                console.log('📋 Rendering customers:', customers);
+                
                 if (customers.length === 0) {
                     tbody.innerHTML = `
                         <tr>
@@ -708,21 +710,23 @@ class AdminApp {
                 
                 tbody.innerHTML = customers.map(customer => `
                     <tr class="hover:bg-gray-50">
-                        <td class="font-medium">${customer.name}</td>
-                        <td>${customer.email}</td>
+                        <td class="font-medium">${customer.name || 'N/A'}</td>
+                        <td>${customer.email || 'N/A'}</td>
                         <td>${customer.phone || 'N/A'}</td>
                         <td>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${customer.customerType === 'college' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
-                                ${customer.customerType}
+                                ${customer.customerType || 'outsider'}
                             </span>
                         </td>
                         <td>${customer.orderCount || 0}</td>
-                        <td>${new Date(customer.createdAt).toLocaleDateString()}</td>
+                        <td>${customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'N/A'}</td>
                         <td>
                             <button class="btn-secondary btn-sm">View</button>
                         </td>
                     </tr>
                 `).join('');
+                
+                console.log('✅ Customers rendered successfully');
             }
             
             async refresh() {
