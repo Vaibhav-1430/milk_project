@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Admin Portal - GaramDoodh</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-confirmed { background: #dbeafe; color: #1e40af; }
+        .status-delivered { background: #d1fae5; color: #065f46; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-secondary { background: #f3f4f6; color: #374151; }
+        .loading { opacity: 0.6; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-tachometer-alt mr-2 text-indigo-600"></i>
+                    GaramDoodh Admin Portal
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <span id="adminName" class="text-gray-600">Admin User</span>
+                    <button onclick="logout()" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex space-x-4 mb-6">
+            <button onclick="showSection('dashboard')" class="btn btn-primary" id="dashboardBtn">
+                <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+            </button>
+            <button onclick="showSection('orders')" class="btn btn-secondary" id="ordersBtn">
+                <i class="fas fa-shopping-cart mr-1"></i>Orders
+            </button>
+            <button onclick="showSection('products')" class="btn btn-secondary" id="productsBtn">
+                <i class="fas fa-box mr-1"></i>Products
+            </button>
+            <button onclick="showSection('customers')" class="btn btn-secondary" id="customersBtn">
+                <i class="fas fa-users mr-1"></i>Customers
+            </button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="metric-card">
+                    <div class="metric-value" id="todayOrders">-</div>
+                    <div class="metric-label">Today's Orders</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="todayRevenue">₹-</div>
+                    <div class="metric-label">Today's Revenue</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalCustomers">-</div>
+                    <div class="metric-label">Total Customers</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="pendingOrders">-</div>
+                    <div class="metric-label">Pending Orders</div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3 class="text-lg font-semibold mb-4">Recent Orders</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="ordersSection" style="display: none;">
+            <div class="admin-card">
+                <h3 class="text-lg font-semibold mb-4">All Orders</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allOrdersTable">
+                            <tr><td colspan="6" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="productsSection" style="display: none;">
+            <div class="admin-card">
+                <h3 class="text-lg font-semibold mb-4">All Products</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="productsGrid">
+                    <div class="text-center py-8">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Section -->
+        <div id="customersSection" style="display: none;">
+            <div class="admin-card">
+                <h3 class="text-lg font-semibold mb-4">All Customers</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Type</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTable">
+                            <tr><td colspan="5" class="text-center py-4">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = null;
+        let currentSection = 'dashboard';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Initializing Working Admin Portal...');
+            await login();
+        });
+
+        // Login function
+        async function login() {
+            try {
+                console.log('🔐 Logging in...');
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@garamdoodh.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success && data.data) {
+                    adminToken = data.data.token;
+                    document.getElementById('adminName').textContent = data.data.user.name;
+                    console.log('✅ Login successful');
+                    await loadDashboard();
+                } else {
+                    alert('Login failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login error: ' + error.message);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('ordersSection').style.display = 'none';
+            document.getElementById('productsSection').style.display = 'none';
+            document.getElementById('customersSection').style.display = 'none';
+
+            // Reset button styles
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.className = btn.className.replace('btn-primary', 'btn-secondary');
+            });
+
+            // Show selected section and highlight button
+            document.getElementById(section + 'Section').style.display = 'block';
+            document.getElementById(section + 'Btn').className = document.getElementById(section + 'Btn').className.replace('btn-secondary', 'btn-primary');
+
+            currentSection = section;
+
+            // Load data for section
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'customers':
+                    loadCustomers();
+                    break;
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                console.log('📊 Loading dashboard...');
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ Dashboard data loaded:', data.data);
+                    
+                    // Update metrics
+                    document.getElementById('todayOrders').textContent = data.data.metrics.todayOrders;
+                    document.getElementById('todayRevenue').textContent = '₹' + data.data.metrics.todayRevenue;
+                    document.getElementById('totalCustomers').textContent = data.data.metrics.totalCustomers;
+                    document.getElementById('pendingOrders').textContent = data.data.metrics.pendingOrders;
+
+                    // Update recent orders
+                    const tbody = document.getElementById('recentOrdersTable');
+                    if (data.data.recentOrders.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No recent orders</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.data.recentOrders.map(order => `
+                            <tr>
+                                <td class="font-medium">${order.id}</td>
+                                <td>${order.customer}</td>
+                                <td>₹${order.amount}</td>
+                                <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                                <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                alert('Failed to load dashboard: ' + error.message);
+            }
+        }
+
+        // Load orders
+        async function loadOrders() {
+            try {
+                console.log('📋 Loading orders...');
+                const response = await fetch('/.netlify/functions/admin-orders', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ Orders loaded:', data.data.orders.length);
+                    
+                    const tbody = document.getElementById('allOrdersTable');
+                    if (data.data.orders.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No orders found</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.data.orders.map(order => `
+                            <tr>
+                                <td class="font-medium">${order.orderNumber}</td>
+                                <td>${order.customer.name}</td>
+                                <td>${order.items.length} items</td>
+                                <td>₹${order.pricing.total}</td>
+                                <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                                <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Orders error:', error);
+                document.getElementById('allOrdersTable').innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Failed to load orders</td></tr>';
+            }
+        }
+
+        // Load products
+        async function loadProducts() {
+            try {
+                console.log('📦 Loading products...');
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ Products loaded:', data.data.products.length);
+                    
+                    const grid = document.getElementById('productsGrid');
+                    if (data.data.products.length === 0) {
+                        grid.innerHTML = '<div class="col-span-full text-center py-8">No products found</div>';
+                    } else {
+                        grid.innerHTML = data.data.products.map(product => `
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <img src="${product.image || '/placeholder.jpg'}" alt="${product.name}" class="w-full h-32 object-cover rounded mb-3">
+                                <h4 class="font-semibold">${product.name}</h4>
+                                <p class="text-sm text-gray-600">${product.quantity}</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-lg font-bold text-green-600">₹${product.price}</span>
+                                    <span class="text-sm text-gray-500">Stock: ${product.stock}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Products error:', error);
+                document.getElementById('productsGrid').innerHTML = '<div class="text-center py-8 text-red-500">Failed to load products</div>';
+            }
+        }
+
+        // Load customers
+        async function loadCustomers() {
+            try {
+                console.log('👥 Loading customers...');
+                const response = await fetch('/.netlify/functions/admin-customers', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ Customers loaded:', data.data.customers.length);
+                    
+                    const tbody = document.getElementById('customersTable');
+                    if (data.data.customers.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No customers found</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.data.customers.map(customer => `
+                            <tr>
+                                <td class="font-medium">${customer.name}</td>
+                                <td>${customer.email}</td>
+                                <td>${customer.phone || 'N/A'}</td>
+                                <td>
+                                    <span class="inline-flex px-2 py-1 text-xs rounded-full ${customer.customerType === 'college' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${customer.customerType}
+                                    </span>
+                                </td>
+                                <td>${new Date(customer.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Customers error:', error);
+                document.getElementById('customersTable').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-500">Failed to load customers</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>
