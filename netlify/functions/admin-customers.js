@@ -29,12 +29,18 @@ async function verifyAdminToken(authHeader) {
 
 exports.handler = async (event) => {
     try {
+        console.log('🔍 Admin customers request - Method:', event.httpMethod);
+        
         // Verify admin authentication
         const authHeader = event.headers.authorization || event.headers.Authorization;
-        const decoded = await verifyAdminToken(authHeader);
+        console.log('Auth header present:', !!authHeader);
         
-        console.log('🔍 Admin customers request from:', decoded.userId);
+        const decoded = await verifyAdminToken(authHeader);
+        console.log('✅ Admin verified:', decoded.userId);
+        
+        console.log('Connecting to database...');
         await connectToDatabase();
+        console.log('✅ Database connected');
         
         if (event.httpMethod === 'GET') {
             return await handleGetCustomers(event);
@@ -46,130 +52,72 @@ exports.handler = async (event) => {
         
     } catch (error) {
         console.error('💥 Admin customers error:', error);
+        console.error('Error stack:', error.stack);
         return json({
             success: false,
-            message: error.message === 'No token provided' || error.message === 'Invalid token' 
-                ? 'Unauthorized' 
-                : 'Failed to process request',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        }, error.message === 'No token provided' || error.message === 'Invalid token' ? 401 : 500);
+            message: error.message || 'Failed to process request',
+            error: error.message,
+            stack: error.stack
+        }, error.message === 'No token provided' || error.message.includes('Invalid token') ? 401 : 500);
     }
 };
 
 async function handleGetCustomers(event) {
-    const params = new URLSearchParams(event.queryStringParameters || '');
-    
-    // Parse query parameters
-    const page = parseInt(params.get('page')) || 1;
-    const limit = Math.min(parseInt(params.get('limit')) || 20, 100);
-    const customerType = params.get('customerType');
-    const isActive = params.get('isActive');
-    const search = params.get('search');
-    const sortBy = params.get('sortBy') || 'createdAt';
-    const sortOrder = params.get('sortOrder') === 'asc' ? 1 : -1;
-    const customerId = params.get('customerId');
-    
-    // If requesting specific customer details
-    if (customerId) {
-        return await handleGetCustomerDetails(customerId);
-    }
-    
-    // Build filter query (exclude admin users)
-    const filter = { role: { $ne: 'admin' } };
-    
-    if (customerType) filter.customerType = customerType;
-    if (isActive !== null && isActive !== undefined) {
-        filter.isActive = isActive === 'true';
-    }
-    
-    // Search filter
-    if (search) {
-        const searchRegex = new RegExp(search, 'i');
-        filter.$or = [
-            { name: searchRegex },
-            { email: searchRegex },
-            { phone: searchRegex }
-        ];
-    }
-    
     try {
+        console.log('📋 Fetching customers...');
+        
+        const params = new URLSearchParams(event.queryStringParameters || '');
+        
+        // Parse query parameters
+        const page = parseInt(params.get('page')) || 1;
+        const limit = Math.min(parseInt(params.get('limit')) || 20, 100);
+        const customerId = params.get('customerId');
+        
+        // If requesting specific customer details
+        if (customerId) {
+            return await handleGetCustomerDetails(customerId);
+        }
+        
+        // Build filter query (exclude admin users)
+        const filter = { role: { $ne: 'admin' } };
+        
         // Get total count for pagination
         const totalCustomers = await User.countDocuments(filter);
+        console.log(`Found ${totalCustomers} customers`);
         
         // Get customers with pagination
         const customers = await User.find(filter)
             .select('-password') // Exclude password field
-            .sort({ [sortBy]: sortOrder })
+            .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
         
-        // Get order statistics for each customer
-        const customerIds = customers.map(customer => customer._id);
+        console.log(`Returning ${customers.length} customers`);
         
-        const orderStats = await Order.aggregate([
-            {
-                $match: { user: { $in: customerIds } }
-            },
-            {
-                $group: {
-                    _id: '$user',
-                    totalOrders: { $sum: 1 },
-                    totalSpent: { 
-                        $sum: { 
-                            $cond: [
-                                { $eq: ['$payment.status', 'paid'] },
-                                '$pricing.total',
-                                0
-                            ]
-                        }
-                    },
-                    lastOrderDate: { $max: '$createdAt' },
-                    avgOrderValue: { 
-                        $avg: { 
-                            $cond: [
-                                { $eq: ['$payment.status', 'paid'] },
-                                '$pricing.total',
-                                null
-                            ]
-                        }
-                    }
-                }
+        // Get order count for each customer (simplified)
+        const customersWithStats = await Promise.all(customers.map(async (customer) => {
+            try {
+                const orderCount = await Order.countDocuments({ user: customer._id });
+                return {
+                    ...customer,
+                    orderCount,
+                    status: customer.isActive ? 'active' : 'inactive'
+                };
+            } catch (err) {
+                console.error('Error getting order count for customer:', customer._id, err);
+                return {
+                    ...customer,
+                    orderCount: 0,
+                    status: customer.isActive ? 'active' : 'inactive'
+                };
             }
-        ]);
-        
-        // Create a map for quick lookup
-        const statsMap = {};
-        orderStats.forEach(stat => {
-            statsMap[stat._id.toString()] = stat;
-        });
-        
-        // Enhance customers with order statistics
-        const enhancedCustomers = customers.map(customer => {
-            const stats = statsMap[customer._id.toString()] || {
-                totalOrders: 0,
-                totalSpent: 0,
-                lastOrderDate: null,
-                avgOrderValue: 0
-            };
-            
-            return {
-                ...customer,
-                orderStats: {
-                    totalOrders: stats.totalOrders,
-                    totalSpent: stats.totalSpent,
-                    lastOrderDate: stats.lastOrderDate,
-                    avgOrderValue: stats.avgOrderValue || 0
-                },
-                customerValue: calculateCustomerValue(stats),
-                status: customer.isActive ? 'active' : 'inactive'
-            };
-        });
+        }));
         
         return json({
             success: true,
             data: {
-                customers: enhancedCustomers,
+                customers: customersWithStats,
                 pagination: {
                     currentPage: page,
                     totalPages: Math.ceil(totalCustomers / limit),
@@ -177,17 +125,12 @@ async function handleGetCustomers(event) {
                     limit,
                     hasNext: page < Math.ceil(totalCustomers / limit),
                     hasPrev: page > 1
-                },
-                filters: {
-                    customerType,
-                    isActive,
-                    search
                 }
             }
         });
         
     } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error('💥 Error fetching customers:', error);
         throw error;
     }
 }

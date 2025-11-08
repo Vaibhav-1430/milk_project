@@ -29,12 +29,18 @@ async function verifyAdminToken(authHeader) {
 
 exports.handler = async (event) => {
     try {
+        console.log('🔍 Admin orders request - Method:', event.httpMethod);
+        
         // Verify admin authentication
         const authHeader = event.headers.authorization || event.headers.Authorization;
-        const decoded = await verifyAdminToken(authHeader);
+        console.log('Auth header present:', !!authHeader);
         
-        console.log('🔍 Admin orders request from:', decoded.userId);
+        const decoded = await verifyAdminToken(authHeader);
+        console.log('✅ Admin verified:', decoded.userId);
+        
+        console.log('Connecting to database...');
         await connectToDatabase();
+        console.log('✅ Database connected');
         
         if (event.httpMethod === 'GET') {
             return await handleGetOrders(event);
@@ -48,13 +54,13 @@ exports.handler = async (event) => {
         
     } catch (error) {
         console.error('💥 Admin orders error:', error);
+        console.error('Error stack:', error.stack);
         return json({
             success: false,
-            message: error.message === 'No token provided' || error.message === 'Invalid token' 
-                ? 'Unauthorized' 
-                : 'Failed to process request',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        }, error.message === 'No token provided' || error.message === 'Invalid token' ? 401 : 500);
+            message: error.message || 'Failed to process request',
+            error: error.message,
+            stack: error.stack
+        }, error.message === 'No token provided' || error.message.includes('Invalid token') ? 401 : 500);
     }
 };
 
