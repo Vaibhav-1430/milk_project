@@ -3,36 +3,6 @@
   command = "npm install"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/api/admin/dashboard"
-  to = "/.netlify/functions/admin-dashboard"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/api/admin/orders*"
-  to = "/.netlify/functions/admin-orders/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/api/admin/products*"
-  to = "/.netlify/functions/admin-products/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/api/admin/customers*"
-  to = "/.netlify/functions/admin-customers/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/api/admin-validate"
-  to = "/.netlify/functions/admin-validate"
-  status = 200
-
-[[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
