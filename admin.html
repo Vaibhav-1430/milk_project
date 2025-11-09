@@ -3,133 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GaramDoodh Admin Portal - Comprehensive milk delivery management system">
     <title>Admin Portal - GaramDoodh</title>
-    
-    <!-- CSS Framework and Styles -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="admin-portal/css/admin-styles.css" rel="stylesheet">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#4F46E5">
-    <!-- Temporarily remove manifest to avoid 404 errors -->
-    <!-- <link rel="manifest" href="admin-portal/manifest.json"> -->
+    <style>
+        .tab-button {
+            padding: 12px 24px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            border-bottom-color: #4F46E5;
+            color: #4F46E5;
+            font-weight: 600;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-confirmed { background: #DBEAFE; color: #1E40AF; }
+        .status-delivered { background: #D1FAE5; color: #065F46; }
+        .status-cancelled { background: #FEE2E2; color: #991B1B; }
+        .hidden { display: none !important; }
+    </style>
 </head>
-<body class="bg-gray-50 font-sans">
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p class="mt-4 text-gray-600">Loading Admin Portal...</p>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">🥛 GaramDoodh Admin</h1>
+                    <p class="text-sm text-gray-600">Manage your milk delivery business</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="adminNameDisplay" class="text-gray-700 font-medium"></span>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-700 font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button class="tab-button active" onclick="switchTab('dashboard')">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </button>
+                <button class="tab-button" onclick="switchTab('orders')">
+                    <i class="fas fa-shopping-cart mr-2"></i>Orders
+                </button>
+                <button class="tab-button" onclick="switchTab('products')">
+                    <i class="fas fa-box mr-2"></i>Products
+                </button>
+                <button class="tab-button" onclick="switchTab('customers')">
+                    <i class="fas fa-users mr-2"></i>Customers
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Main App Container -->
-    <div id="app" class="hidden min-h-screen">
-        <!-- Sidebar Navigation -->
-        <nav id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
-            <div class="flex items-center justify-center h-16 bg-indigo-600">
-                <h1 class="text-white text-xl font-bold">GaramDoodh Admin</h1>
-            </div>
-            
-            <div class="mt-8">
-                <nav class="px-4 space-y-2" id="navigationMenu">
-                    <!-- Navigation items will be populated by JavaScript -->
-                </nav>
-            </div>
-        </nav>
-
-        <!-- Mobile Sidebar Overlay -->
-        <div id="sidebarOverlay" class="fixed inset-0 z-20 bg-black opacity-50 hidden lg:hidden"></div>
-
-        <!-- Main Content Area -->
-        <div class="lg:ml-64">
-            <!-- Top Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200">
-                <div class="flex items-center justify-between px-6 py-4">
-                    <!-- Mobile Menu Button -->
-                    <button id="mobileMenuBtn" class="lg:hidden text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-
-                    <!-- Breadcrumb -->
-                    <nav id="breadcrumb" class="flex items-center space-x-2 text-sm text-gray-600">
-                        <!-- Breadcrumb items will be populated by JavaScript -->
-                    </nav>
-
-                    <!-- Header Actions -->
-                    <div class="flex items-center space-x-4">
-                        <!-- Notifications -->
-                        <div class="relative">
-                            <button id="notificationBtn" class="text-gray-600 hover:text-gray-900 relative">
-                                <i class="fas fa-bell text-xl"></i>
-                                <span id="notificationBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
-                            </button>
-                            
-                            <!-- Notification Dropdown -->
-                            <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
-                                <div class="p-4 border-b border-gray-200">
-                                    <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
-                                </div>
-                                <div id="notificationList" class="max-h-64 overflow-y-auto">
-                                    <!-- Notifications will be populated by JavaScript -->
-                                </div>
-                            </div>
+    <!-- Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total Orders</p>
+                            <p id="totalOrders" class="text-3xl font-bold text-gray-900">-</p>
                         </div>
-
-                        <!-- Admin Profile -->
-                        <div class="relative">
-                            <button id="profileBtn" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-                                <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user text-white text-sm"></i>
-                                </div>
-                                <span id="adminName" class="hidden md:block">Admin</span>
-                                <i class="fas fa-chevron-down text-sm"></i>
-                            </button>
-                            
-                            <!-- Profile Dropdown -->
-                            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
-                                <div class="py-2">
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-user-cog mr-2"></i>Profile Settings
-                                    </a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-cog mr-2"></i>System Settings
-                                    </a>
-                                    <hr class="my-2">
-                                    <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="bg-indigo-100 rounded-full p-3">
+                            <i class="fas fa-shopping-cart text-indigo-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
-            </header>
-
-            <!-- Main Content -->
-            <main class="p-6">
-                <!-- Page Title -->
-                <div class="mb-6">
-                    <h1 id="pageTitle" class="text-2xl font-bold text-gray-900">Dashboard</h1>
-                    <p id="pageDescription" class="text-gray-600 mt-1">Welcome to the GaramDoodh Admin Portal</p>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total Products</p>
+                            <p id="totalProducts" class="text-3xl font-bold text-gray-900">-</p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-box text-green-600 text-xl"></i>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Dynamic Content Area -->
-                <div id="mainContent">
-                    <!-- Content will be loaded dynamically by JavaScript components -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total Customers</p>
+                            <p id="totalCustomers" class="text-3xl font-bold text-gray-900">-</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
                 </div>
-            </main>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Today's Revenue</p>
+                            <p id="todayRevenue" class="text-3xl font-bold text-gray-900">₹0</p>
+                        </div>
+                        <div class="bg-yellow-100 rounded-full p-3">
+                            <i class="fas fa-rupee-sign text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Toast Notifications Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
-        <!-- Toast notifications will be added here dynamically -->
-    </div>
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Orders Management</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading orders...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    <!-- JavaScript Modules -->
-    <script type="module" src="admin-portal/js/admin-app.js"></script>
+        <!-- Products Tab -->
+        <div id="productsTab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Products Management</h2>
+                </div>
+                <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                    <div class="text-center text-gray-500 col-span-full">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>Loading products...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customersTab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Customers Management</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading customers...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let adminToken = null;
+        let adminData = null;
+
+        // Check authentication on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('🔍 Checking admin authentication...');
+            
+            adminToken = localStorage.getItem('admin_token');
+            const storedInfo = localStorage.getItem('admin_info');
+
+            if (!adminToken || !storedInfo) {
+                console.log('❌ No admin session found, redirecting to login...');
+                alert('Please login as admin first');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                adminData = JSON.parse(storedInfo);
+                console.log('✅ Admin authenticated:', adminData.name);
+                document.getElementById('adminNameDisplay').textContent = adminData.name;
+                
+                // Load all data
+                await loadAllData();
+            } catch (error) {
+                console.error('❌ Authentication error:', error);
+                alert('Session error. Please login again.');
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_info');
+                window.location.href = 'login.html';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_info');
+            window.location.href = 'login.html';
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tab-button').classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+        }
+
+        async function loadAllData() {
+            console.log('📊 Loading all data...');
+            await Promise.all([
+                loadDashboard(),
+                loadOrders(),
+                loadProducts(),
+                loadCustomers()
+            ]);
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const metrics = data.data.metrics;
+                    document.getElementById('totalOrders').textContent = metrics.todayOrders || 0;
+                    document.getElementById('todayRevenue').textContent = '₹' + (metrics.todayRevenue || 0);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/.netlify/functions/admin-orders', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const orders = data.data.orders;
+                    document.getElementById('totalOrders').textContent = orders.length;
+                    const tbody = document.getElementById('ordersTableBody');
+                    if (orders.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No orders found</td></tr>';
+                    } else {
+                        tbody.innerHTML = orders.map(order => `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">${order.orderNumber}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${order.customer.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${order.items.length} items</td>
+                                <td class="px-6 py-4 whitespace-nowrap">₹${order.pricing.total}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-${order.status}">${order.status}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">${new Date(order.createdAt).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('ordersTableBody').innerHTML = 
+                    '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error loading orders</td></tr>';
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const products = data.data.products;
+                    document.getElementById('totalProducts').textContent = products.length;
+                    const grid = document.getElementById('productsGrid');
+                    if (products.length === 0) {
+                        grid.innerHTML = '<div class="col-span-full text-center text-gray-500">No products found</div>';
+                    } else {
+                        grid.innerHTML = products.map(product => `
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+                                <img src="${product.image}" alt="${product.name}" class="w-full h-32 object-cover rounded mb-3">
+                                <h3 class="font-semibold text-gray-900">${product.name}</h3>
+                                <p class="text-sm text-gray-600 mb-2">${product.quantity}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-bold text-green-600">₹${product.price}</span>
+                                    <span class="text-sm text-gray-500">Stock: ${product.stock}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsGrid').innerHTML = 
+                    '<div class="col-span-full text-center text-red-500">Error loading products</div>';
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/.netlify/functions/admin-customers', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const customers = data.data.customers;
+                    document.getElementById('totalCustomers').textContent = customers.length;
+                    const tbody = document.getElementById('customersTableBody');
+                    if (customers.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No customers found</td></tr>';
+                    } else {
+                        tbody.innerHTML = customers.map(customer => `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">${customer.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${customer.email}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${customer.phone || 'N/A'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs rounded-full ${customer.customerType === 'college' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${customer.customerType}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">${customer.orderCount || 0}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading customers:', error);
+                document.getElementById('customersTableBody').innerHTML = 
+                    '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error loading customers</td></tr>';
+            }
+        }
+    </script>
 </body>
 </html>

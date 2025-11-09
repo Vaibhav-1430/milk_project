@@ -6,7 +6,7 @@ class LoginManager {
     this.passwordForm = document.getElementById("passwordLoginForm");
     this.otpForm = document.getElementById("otpLoginForm");
     this.apiBase = this.getApiBaseUrl();
-    
+
     // State management
     this.currentLoginMethod = 'password';
     this.otpTimer = null;
@@ -40,17 +40,17 @@ class LoginManager {
   bindEvents() {
     // Password form events
     this.passwordForm.addEventListener("submit", (e) => this.handlePasswordLogin(e));
-    
+
     // OTP form events
     this.otpForm.addEventListener("submit", (e) => this.handleOtpVerification(e));
     document.getElementById("sendOtpBtn").addEventListener("click", (e) => this.handleSendOtp(e));
     document.getElementById("resendOtpLink").addEventListener("click", (e) => this.handleResendOtp(e));
-    
+
     // Password toggle
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
     const passwordIcon = document.getElementById("passwordIcon");
-    
+
     if (togglePassword) {
       togglePassword.addEventListener("click", () => {
         const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
@@ -58,7 +58,7 @@ class LoginManager {
         passwordIcon.className = type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
       });
     }
-    
+
     // Admin demo button
     const adminDemoBtn = document.getElementById("adminDemoBtn");
     if (adminDemoBtn) {
@@ -136,15 +136,15 @@ class LoginManager {
 
   switchTab(method, activeTab, inactiveTab, activeForm, inactiveForm) {
     this.currentLoginMethod = method;
-    
+
     // Update tab appearance
     activeTab.classList.add('active');
     inactiveTab.classList.remove('active');
-    
+
     // Show/hide forms
     activeForm.classList.remove('hidden');
     inactiveForm.classList.add('hidden');
-    
+
     // Clear any alerts
     this.hideAlert();
   }
@@ -322,13 +322,13 @@ class LoginManager {
     const otpTab = document.getElementById("otpTab");
     const passwordForm = document.getElementById("passwordLoginForm");
     const otpForm = document.getElementById("otpLoginForm");
-    
+
     this.switchTab('password', passwordTab, otpTab, passwordForm, otpForm);
-    
+
     // Fill in admin credentials
     document.getElementById("email").value = 'admin@garamdoodh.com';
     document.getElementById("password").value = 'admin123';
-    
+
     this.showAlert('Admin credentials loaded. These must exist in your database.', 'info');
   }
 
@@ -342,16 +342,16 @@ class LoginManager {
   // Start OTP timer
   startOtpTimer(seconds) {
     this.clearOtpTimer();
-    
+
     this.otpExpiryTime = Date.now() + (seconds * 1000);
     const timerElement = document.getElementById("otpTimer");
     const resendLink = document.getElementById("resendOtpLink");
-    
+
     resendLink.classList.add("hidden");
-    
+
     this.otpTimer = setInterval(() => {
       const remaining = Math.max(0, Math.floor((this.otpExpiryTime - Date.now()) / 1000));
-      
+
       if (remaining > 0) {
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
@@ -376,9 +376,9 @@ class LoginManager {
   setButtonLoading(btnId, textId, loading = true, label = "Sign In") {
     const btn = document.getElementById(btnId);
     const textElement = document.getElementById(textId);
-    
+
     if (!btn || !textElement) return;
-    
+
     if (loading) {
       btn.disabled = true;
       textElement.innerHTML = `<span class="loading-spinner"></span>${label}`;
@@ -392,11 +392,11 @@ class LoginManager {
   showAlert(message, type = "info") {
     const alertElement = document.getElementById("alertMessage");
     if (!alertElement) return;
-    
+
     alertElement.className = `alert alert-${type}`;
     alertElement.textContent = message;
     alertElement.style.display = "block";
-    
+
     // Auto-hide success and info messages
     if (type === 'success' || type === 'info') {
       setTimeout(() => {
