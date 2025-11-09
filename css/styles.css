@@ -473,6 +473,55 @@ input:focus, select:focus, textarea:focus {
 .badge.green { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
 .badge.blue { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
 
+/* Product description */
+.product-description {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* Stock warning */
+.stock-warning {
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* Out of stock overlay */
+.product-image {
+    position: relative;
+}
+
+.out-of-stock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Loading products */
+.loading-products {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.loading-products i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
 .product-actions {
     display: flex;
     justify-content: space-between;

@@ -1,73 +1,128 @@
-// Product data
-window.products = [
-    {
-        id: 1,
-        name: 'Fresh Boiled Milk',
-        quantity: '100 ml',
-        price: 17,
-        image: 'images/garam-doodh-logo.png'
-    },
-    {
-        id: 2,
-        name: 'Fresh Boiled Milk',
-        quantity: '250 ml',
-        price: 32,
-        image: 'images/garam-doodh-logo.png'
-    },
-    {
-        id: 3,
-        name: 'Fresh Boiled Milk',
-        quantity: '500 ml',
-        price: 52,
-        image: 'images/garam-doodh-logo.png'
-    },
-    {
-        id: 4,
-        name: 'Fresh Boiled Milk',
-        quantity: '1 L',
-        price: 92,
-        image: 'images/garam-doodh-logo.png'
-    },
-    {
-        id: 5,
-        name: 'Fresh Boiled Milk',
-        quantity: '2 L',
-        price: 172,
-        image: 'images/garam-doodh-logo.png'
-    },
-    {
-        id: 6,
-        name: 'Fresh Boiled Milk',
-        quantity: '5 L',
-        price: 402,
-        image: 'images/garam-doodh-logo.png'
+// Product data - will be loaded from API
+window.products = [];
+
+// Fetch products from API
+async function fetchProducts() {
+    try {
+        console.log('🔄 Fetching products from API...');
+        const response = await fetch('/.netlify/functions/products');
+        const data = await response.json();
+        
+        if (data.success && data.data && data.data.products) {
+            window.products = data.data.products.map(product => ({
+                id: product._id,
+                name: product.name,
+                quantity: product.quantity,
+                price: product.price,
+                image: product.image,
+                description: product.description,
+                category: product.category,
+                stock: product.stock,
+                isAvailable: product.isAvailable
+            }));
+            console.log('✅ Loaded', window.products.length, 'products from database');
+            return true;
+        } else {
+            console.warn('⚠️ No products found in API response, using fallback');
+            loadFallbackProducts();
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error fetching products:', error);
+        loadFallbackProducts();
+        return false;
     }
-];
+}
+
+// Fallback products if API fails
+function loadFallbackProducts() {
+    window.products = [
+        {
+            id: 1,
+            name: 'Fresh Boiled Milk',
+            quantity: '100 ml',
+            price: 17,
+            image: 'images/garam-doodh-logo.png'
+        },
+        {
+            id: 2,
+            name: 'Fresh Boiled Milk',
+            quantity: '250 ml',
+            price: 32,
+            image: 'images/garam-doodh-logo.png'
+        },
+        {
+            id: 3,
+            name: 'Fresh Boiled Milk',
+            quantity: '500 ml',
+            price: 52,
+            image: 'images/garam-doodh-logo.png'
+        },
+        {
+            id: 4,
+            name: 'Fresh Boiled Milk',
+            quantity: '1 L',
+            price: 92,
+            image: 'images/garam-doodh-logo.png'
+        },
+        {
+            id: 5,
+            name: 'Fresh Boiled Milk',
+            quantity: '2 L',
+            price: 172,
+            image: 'images/garam-doodh-logo.png'
+        },
+        {
+            id: 6,
+            name: 'Fresh Boiled Milk',
+            quantity: '5 L',
+            price: 402,
+            image: 'images/garam-doodh-logo.png'
+        }
+    ];
+}
 
 // Function to create product card HTML
-function createProductCard(product) {
-    const delay = product.id * 50;
+function createProductCard(product, index = 0) {
+    const delay = index * 50;
+    const isAvailable = product.isAvailable !== false && product.stock > 0;
+    
+    // Determine badges based on product properties
+    let badges = '';
+    if (product.category === 'eggs') {
+        badges += '<span class="badge green">Fresh</span>';
+    } else {
+        badges += '<span class="badge green">Fresh</span>';
+        if (product.quantity === '1 L') {
+            badges += '<span class="badge blue">Best Value</span>';
+        }
+        if (product.quantity === '250 ml') {
+            badges += '<span class="badge">Popular</span>';
+        }
+    }
+    
     return `
         <div class="product-card" data-id="${product.id}" data-aos="fade-up" data-aos-delay="${delay}">
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name} ${product.quantity}" onerror="this.onerror=null; this.src='images/logo.svg';">
+                ${!isAvailable ? '<div class="out-of-stock-overlay">Out of Stock</div>' : ''}
             </div>
             <div class="product-info">
                 <div class="badges">
-                    <span class="badge green">Fresh</span>
-                    ${product.id === 4 ? '<span class="badge blue">Best Value</span>' : ''}
-                    ${product.id === 2 ? '<span class="badge">Popular</span>' : ''}
+                    ${badges}
                 </div>
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-quantity">${product.quantity}</p>
+                ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
                 <p class="product-price">₹${product.price.toFixed(2)}</p>
+                ${product.stock <= 10 && product.stock > 0 ? `<p class="stock-warning">Only ${product.stock} left!</p>` : ''}
                 <div class="product-actions">
                     <div class="quantity-selector">
-                        <button class="quantity-btn decrease">-</button>
-                        <input type="number" class="quantity-input" value="1" min="1" max="20">
-                        <button class="quantity-btn increase">+</button>
+                        <button class="quantity-btn decrease" ${!isAvailable ? 'disabled' : ''}>-</button>
+                        <input type="number" class="quantity-input" value="1" min="1" max="${Math.min(product.stock || 20, 20)}" ${!isAvailable ? 'disabled' : ''}>
+                        <button class="quantity-btn increase" ${!isAvailable ? 'disabled' : ''}>+</button>
                     </div>
-                    <button class="btn add-to-cart">Add to Cart</button>
+                    <button class="btn add-to-cart" ${!isAvailable ? 'disabled' : ''}>${isAvailable ? 'Add to Cart' : 'Out of Stock'}</button>
                 </div>
             </div>
         </div>
@@ -75,15 +130,21 @@ function createProductCard(product) {
 }
 
 // Function to display products on the homepage
-function displayFeaturedProducts() {
+async function displayFeaturedProducts() {
     const featuredProductsContainer = document.querySelector('.featured-products .product-grid');
     if (!featuredProductsContainer) return;
+
+    // Wait for products to load
+    if (window.products.length === 0) {
+        await fetchProducts();
+    }
 
     // Display only first 3 products on homepage
     const featuredProducts = window.products.slice(0, 3);
     
-    featuredProducts.forEach(product => {
-        featuredProductsContainer.innerHTML += createProductCard(product);
+    featuredProductsContainer.innerHTML = '';
+    featuredProducts.forEach((product, index) => {
+        featuredProductsContainer.innerHTML += createProductCard(product, index);
     });
 
     // Add event listeners to the featured products
@@ -91,14 +152,22 @@ function displayFeaturedProducts() {
 }
 
 // Function to display all products on the products page
-function displayAllProducts() {
+async function displayAllProducts() {
     const productsContainer = document.getElementById('products-container');
     if (!productsContainer) return;
 
+    // Show loading state
+    productsContainer.innerHTML = '<div class="loading-products"><i class="fas fa-spinner fa-spin"></i> Loading products...</div>';
+
+    // Wait for products to load
+    if (window.products.length === 0) {
+        await fetchProducts();
+    }
+
     productsContainer.innerHTML = '';
     
-    window.products.forEach(product => {
-        productsContainer.innerHTML += createProductCard(product);
+    window.products.forEach((product, index) => {
+        productsContainer.innerHTML += createProductCard(product, index);
     });
 
     // Add event listeners to all products
@@ -197,7 +266,11 @@ function setupSorting() {
 }
 
 // Initialize product displays
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Fetch products first
+    await fetchProducts();
+    
+    // Then display them
     displayFeaturedProducts();
     displayAllProducts();
     setupSorting();
