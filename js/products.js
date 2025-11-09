@@ -201,7 +201,7 @@ function addProductEventListeners() {
             }
             
             const productCard = this.closest('.product-card');
-            const productId = parseInt(productCard.dataset.id);
+            const productId = productCard.dataset.id; // Keep as string (works with both number and ObjectID)
             const quantity = parseInt(productCard.querySelector('.quantity-input').value);
             
             addToCart(productId, quantity);

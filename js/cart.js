@@ -51,10 +51,12 @@ function updateCartCount() {
 
 // Add item to cart
 function addToCart(productId, quantity) {
-    const product = window.products.find(p => p.id === productId);
+    // Convert productId to string for comparison (handles both number and string IDs)
+    const productIdStr = String(productId);
+    const product = window.products.find(p => String(p.id) === productIdStr);
     if (!product) return;
 
-    const existingItem = cart.find(item => item.id === productId);
+    const existingItem = cart.find(item => String(item.id) === productIdStr);
 
     if (existingItem) {
         existingItem.quantity += quantity;
@@ -74,14 +76,16 @@ function addToCart(productId, quantity) {
 
 // Remove item from cart
 function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+    const productIdStr = String(productId);
+    cart = cart.filter(item => String(item.id) !== productIdStr);
     saveCart();
     displayCart();
 }
 
 // Update item quantity in cart
 function updateCartItemQuantity(productId, quantity) {
-    const item = cart.find(item => item.id === productId);
+    const productIdStr = String(productId);
+    const item = cart.find(item => String(item.id) === productIdStr);
     if (item) {
         item.quantity = quantity;
         if (item.quantity <= 0) {
@@ -210,7 +214,7 @@ function addCartEventListeners() {
     document.querySelectorAll('.cart-item .quantity-btn').forEach(button => {
         button.addEventListener('click', function () {
             const cartItem = this.closest('.cart-item');
-            const productId = parseInt(cartItem.dataset.id);
+            const productId = cartItem.dataset.id; // Keep as string
             const input = cartItem.querySelector('.quantity-input');
             let value = parseInt(input.value);
 
@@ -228,7 +232,7 @@ function addCartEventListeners() {
     document.querySelectorAll('.cart-item .quantity-input').forEach(input => {
         input.addEventListener('change', function () {
             const cartItem = this.closest('.cart-item');
-            const productId = parseInt(cartItem.dataset.id);
+            const productId = cartItem.dataset.id; // Keep as string
             let value = parseInt(this.value);
 
             value = Math.max(1, Math.min(value, 20));
@@ -241,7 +245,7 @@ function addCartEventListeners() {
     document.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', function () {
             const cartItem = this.closest('.cart-item');
-            const productId = parseInt(cartItem.dataset.id);
+            const productId = cartItem.dataset.id; // Keep as string
 
             removeFromCart(productId);
         });
