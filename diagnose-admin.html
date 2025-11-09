@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal Diagnostics</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-card { background: white; border-radius: 8px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        pre { background: #f3f4f6; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #3730a3; }
+        .loading { opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Admin Portal Diagnostics</h1>
+        <p>This page will help identify why the admin portal isn't showing data.</p>
+        
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="location.reload()">Refresh Page</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let results = [];
+        
+        function addResult(title, message, type = 'info', data = null) {
+            const result = { title, message, type, data, time: new Date().toLocaleTimeString() };
+            results.push(result);
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = results.map(r => `
+                <div class="test-card">
+                    <h3 class="${r.type}">${r.time} - ${r.title}</h3>
+                    <p>${r.message}</p>
+                    ${r.data ? `<pre>${JSON.stringify(r.data, null, 2)}</pre>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        async function runAllTests() {
+            results = [];
+            addResult('Starting Diagnostics', 'Running comprehensive tests...', 'info');
+            
+            await testEnvironment();
+            await testLogin();
+            await testDashboardAPI();
+            await testOrdersAPI();
+            await testProductsAPI();
+            await testCustomersAPI();
+            
+            addResult('Diagnostics Complete', 'All tests finished. Review results above.', 'success');
+        }
+        
+        async function testEnvironment() {
+            addResult('Environment Check', 'Checking browser and network...', 'info');
+            
+            const env = {
+                url: window.location.href,
+                protocol: window.location.protocol,
+                hostname: window.location.hostname,
+                userAgent: navigator.userAgent,
+                online: navigator.onLine
+            };
+            
+            addResult('Environment Info', 'Browser and network details', 'info', env);
+            
+            if (window.location.protocol === 'file:') {
+                addResult('Protocol Warning', 'You are viewing this from file:// - Netlify functions will NOT work! You must access via https://garamdoodh.netlify.app', 'error');
+            } else {
+                addResult('Protocol OK', 'Viewing via HTTP/HTTPS - Netlify functions should work', 'success');
+            }
+        }
+        
+        async function testLogin() {
+            addResult('Login Test', 'Testing admin login...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@garamdoodh.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    window.adminToken = data.data.token;
+                    addResult('Login Success', `Logged in as ${data.data.user.name}`, 'success', {
+                        user: data.data.user.name,
+                        email: data.data.user.email,
+                        role: data.data.user.role,
+                        tokenLength: data.data.token.length
+                    });
+                } else {
+                    addResult('Login Failed', data.message || 'Unknown error', 'error', data);
+                }
+            } catch (error) {
+                addResult('Login Error', error.message, 'error', { error: error.toString() });
+            }
+        }
+        
+        async function testDashboardAPI() {
+            if (!window.adminToken) {
+                addResult('Dashboard Test Skipped', 'No admin token available', 'warning');
+                return;
+            }
+            
+            addResult('Dashboard API Test', 'Testing dashboard endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: { 'Authorization': `Bearer ${window.adminToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    addResult('Dashboard API Success', 'Dashboard data loaded successfully', 'success', {
+                        todayOrders: data.data.metrics.todayOrders,
+                        todayRevenue: data.data.metrics.todayRevenue,
+                        totalCustomers: data.data.metrics.totalCustomers,
+                        pendingOrders: data.data.metrics.pendingOrders,
+                        recentOrdersCount: data.data.recentOrders.length
+                    });
+                } else {
+                    addResult('Dashboard API Failed', data.message || 'Unknown error', 'error', data);
+                }
+            } catch (error) {
+                addResult('Dashboard API Error', error.message, 'error', { error: error.toString() });
+            }
+        }
+        
+        async function testOrdersAPI() {
+            if (!window.adminToken) {
+                addResult('Orders Test Skipped', 'No admin token available', 'warning');
+                return;
+            }
+            
+            addResult('Orders API Test', 'Testing orders endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-orders', {
+                    headers: { 'Authorization': `Bearer ${window.adminToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    addResult('Orders API Success', `Found ${data.data.orders.length} orders`, 'success', {
+                        totalOrders: data.data.pagination.totalOrders,
+                        ordersReturned: data.data.orders.length,
+                        firstOrder: data.data.orders[0] ? data.data.orders[0].orderNumber : 'N/A'
+                    });
+                } else {
+                    addResult('Orders API Failed', data.message || 'Unknown error', 'error', data);
+                }
+            } catch (error) {
+                addResult('Orders API Error', error.message, 'error', { error: error.toString() });
+            }
+        }
+        
+        async function testProductsAPI() {
+            if (!window.adminToken) {
+                addResult('Products Test Skipped', 'No admin token available', 'warning');
+                return;
+            }
+            
+            addResult('Products API Test', 'Testing products endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    headers: { 'Authorization': `Bearer ${window.adminToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    addResult('Products API Success', `Found ${data.data.products.length} products`, 'success', {
+                        productsCount: data.data.products.length,
+                        firstProduct: data.data.products[0] ? data.data.products[0].name : 'N/A'
+                    });
+                } else {
+                    addResult('Products API Failed', data.message || 'Unknown error', 'error', data);
+                }
+            } catch (error) {
+                addResult('Products API Error', error.message, 'error', { error: error.toString() });
+            }
+        }
+        
+        async function testCustomersAPI() {
+            if (!window.adminToken) {
+                addResult('Customers Test Skipped', 'No admin token available', 'warning');
+                return;
+            }
+            
+            addResult('Customers API Test', 'Testing customers endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-customers', {
+                    headers: { 'Authorization': `Bearer ${window.adminToken}` }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    addResult('Customers API Success', `Found ${data.data.customers.length} customers`, 'success', {
+                        customersCount: data.data.customers.length,
+                        firstCustomer: data.data.customers[0] ? data.data.customers[0].name : 'N/A'
+                    });
+                } else {
+                    addResult('Customers API Failed', data.message || 'Unknown error', 'error', data);
+                }
+            } catch (error) {
+                addResult('Customers API Error', error.message, 'error', { error: error.toString() });
+            }
+        }
+        
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>

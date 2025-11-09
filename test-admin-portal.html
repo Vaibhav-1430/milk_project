@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Portal - GaramDoodh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .test-group {
+            margin-bottom: 20px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .test-item .status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .test-item .status.loading {
+            background: #ffc107;
+            color: white;
+        }
+        
+        .test-item .status.success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .test-item .status.error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .test-item .label {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .test-item .result {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .login-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .login-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .data-display {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .data-display pre {
+            margin: 0;
+            font-size: 12px;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .summary-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Admin Portal Diagnostic Tool</h1>
+        <p class="subtitle">Test and verify your admin portal functionality</p>
+        
+        <!-- Login Section -->
+        <div class="section">
+            <h2>1. Admin Authentication</h2>
+            <div class="login-form">
+                <input type="email" id="adminEmail" placeholder="Admin Email" value="admin@garamdoodh.com">
+                <input type="password" id="adminPassword" placeholder="Admin Password" value="admin123">
+                <button class="btn" onclick="testLogin()">Login & Test</button>
+            </div>
+            <div class="test-group" id="authTests"></div>
+        </div>
+        
+        <!-- Database Connection -->
+        <div class="section">
+            <h2>2. Database Connection</h2>
+            <div class="test-group" id="dbTests"></div>
+        </div>
+        
+        <!-- Data Fetching -->
+        <div class="section">
+            <h2>3. Data Fetching Tests</h2>
+            <div class="test-group" id="dataTests"></div>
+            
+            <div class="summary" id="dataSummary"></div>
+        </div>
+        
+        <!-- Raw Data Display -->
+        <div class="section">
+            <h2>4. Raw Data Display</h2>
+            <button class="btn" onclick="showRawData()">Show All Data</button>
+            <div class="data-display" id="rawDataDisplay" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let adminToken = null;
+        let testResults = {
+            orders: null,
+            products: null,
+            customers: null,
+            dashboard: null
+        };
+        
+        function addTestItem(containerId, label, status = 'loading', result = '') {
+            const container = document.getElementById(containerId);
+            const item = document.createElement('div');
+            item.className = 'test-item';
+            item.id = `test-${containerId}-${Date.now()}`;
+            
+            const statusIcon = status === 'loading' ? '⏳' : status === 'success' ? '✓' : '✗';
+            
+            item.innerHTML = `
+                <div class="status ${status}">${statusIcon}</div>
+                <div class="label">${label}</div>
+                <div class="result">${result}</div>
+            `;
+            
+            container.appendChild(item);
+            return item.id;
+        }
+        
+        function updateTestItem(itemId, status, result) {
+            const item = document.getElementById(itemId);
+            if (!item) return;
+            
+            const statusIcon = status === 'success' ? '✓' : '✗';
+            const statusDiv = item.querySelector('.status');
+            const resultDiv = item.querySelector('.result');
+            
+            statusDiv.className = `status ${status}`;
+            statusDiv.textContent = statusIcon;
+            resultDiv.textContent = result;
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            document.getElementById('authTests').innerHTML = '';
+            document.getElementById('dbTests').innerHTML = '';
+            document.getElementById('dataTests').innerHTML = '';
+            document.getElementById('dataSummary').innerHTML = '';
+            
+            const loginTestId = addTestItem('authTests', 'Logging in as admin...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/auth-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data.token) {
+                    adminToken = data.data.token;
+                    updateTestItem(loginTestId, 'success', `Logged in as ${data.data.user.name} (${data.data.user.role})`);
+                    
+                    // Run all tests
+                    await testDatabaseConnection();
+                    await testDataFetching();
+                } else {
+                    updateTestItem(loginTestId, 'error', data.message || 'Login failed');
+                }
+            } catch (error) {
+                updateTestItem(loginTestId, 'error', error.message);
+            }
+        }
+        
+        async function testDatabaseConnection() {
+            const dbTestId = addTestItem('dbTests', 'Testing database connection...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateTestItem(dbTestId, 'success', 'Database connected successfully');
+                } else {
+                    updateTestItem(dbTestId, 'error', data.message || 'Connection failed');
+                }
+            } catch (error) {
+                updateTestItem(dbTestId, 'error', error.message);
+            }
+        }
+        
+        async function testDataFetching() {
+            // Test Orders
+            const ordersTestId = addTestItem('dataTests', 'Fetching orders...');
+            try {
+                const response = await fetch('/.netlify/functions/admin-orders', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResults.orders = data.data;
+                    const count = data.data.orders?.length || 0;
+                    updateTestItem(ordersTestId, 'success', `Found ${count} orders`);
+                } else {
+                    updateTestItem(ordersTestId, 'error', data.message);
+                }
+            } catch (error) {
+                updateTestItem(ordersTestId, 'error', error.message);
+            }
+            
+            // Test Products
+            const productsTestId = addTestItem('dataTests', 'Fetching products...');
+            try {
+                const response = await fetch('/.netlify/functions/admin-products', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResults.products = data.data;
+                    const count = data.data.products?.length || 0;
+                    updateTestItem(productsTestId, 'success', `Found ${count} products`);
+                } else {
+                    updateTestItem(productsTestId, 'error', data.message);
+                }
+            } catch (error) {
+                updateTestItem(productsTestId, 'error', error.message);
+            }
+            
+            // Test Customers
+            const customersTestId = addTestItem('dataTests', 'Fetching customers...');
+            try {
+                const response = await fetch('/.netlify/functions/admin-customers', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResults.customers = data.data;
+                    const count = data.data.customers?.length || 0;
+                    updateTestItem(customersTestId, 'success', `Found ${count} customers`);
+                } else {
+                    updateTestItem(customersTestId, 'error', data.message);
+                }
+            } catch (error) {
+                updateTestItem(customersTestId, 'error', error.message);
+            }
+            
+            // Test Dashboard
+            const dashboardTestId = addTestItem('dataTests', 'Fetching dashboard data...');
+            try {
+                const response = await fetch('/.netlify/functions/admin-dashboard', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    testResults.dashboard = data.data;
+                    updateTestItem(dashboardTestId, 'success', 'Dashboard data loaded');
+                    displaySummary();
+                } else {
+                    updateTestItem(dashboardTestId, 'error', data.message);
+                }
+            } catch (error) {
+                updateTestItem(dashboardTestId, 'error', error.message);
+            }
+        }
+        
+        function displaySummary() {
+            const summary = document.getElementById('dataSummary');
+            
+            const metrics = testResults.dashboard?.metrics || {};
+            
+            summary.innerHTML = `
+                <div class="summary-card">
+                    <div class="value">${testResults.orders?.orders?.length || 0}</div>
+                    <div class="label">Total Orders</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">${testResults.products?.products?.length || 0}</div>
+                    <div class="label">Total Products</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">${testResults.customers?.customers?.length || 0}</div>
+                    <div class="label">Total Customers</div>
+                </div>
+                <div class="summary-card">
+                    <div class="value">₹${metrics.todayRevenue || 0}</div>
+                    <div class="label">Today's Revenue</div>
+                </div>
+            `;
+        }
+        
+        function showRawData() {
+            const display = document.getElementById('rawDataDisplay');
+            
+            if (display.style.display === 'none') {
+                display.style.display = 'block';
+                display.innerHTML = `<pre>${JSON.stringify(testResults, null, 2)}</pre>`;
+            } else {
+                display.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
