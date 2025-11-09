@@ -15,7 +15,7 @@ const productSchema = new mongoose.Schema({
     quantity: {
         type: String,
         required: [true, 'Product quantity is required'],
-        enum: ['100 ml', '250 ml', '500 ml', '1 L', '2 L', '5 L']
+        enum: ['100 ml', '250 ml', '500 ml', '1 L', '2 L', '5 L', 'Per Piece', '6 Pieces', '12 Pieces']
     },
     price: {
         type: Number,
@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         default: 'milk',
-        enum: ['milk', 'dairy']
+        enum: ['milk', 'dairy', 'eggs']
     },
     isAvailable: {
         type: Boolean,
